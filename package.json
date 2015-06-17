@@ -1,0 +1,29 @@
+{
+  "name": "coolcadence",
+  "version": "0.0.1",
+  "description": "Cadence detection for accelerometer data.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewhao/coolcadence.git"
+  },
+  "keywords": [
+    "accelerometer",
+    "cadence",
+    "events",
+    "algorithm",
+    "frp"
+  ],
+  "author": "Andrew Hao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andrewhao/coolcadence/issues"
+  },
+  "homepage": "https://github.com/andrewhao/coolcadence",
+  "dependencies": {
+    "baconjs": "^0.7.53"
+  }
+}
