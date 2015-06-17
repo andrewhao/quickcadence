@@ -25,5 +25,8 @@
   "homepage": "https://github.com/andrewhao/coolcadence",
   "dependencies": {
     "baconjs": "^0.7.53"
+  },
+  "devDependencies": {
+    "karma": "^0.12.36"
   }
 }
