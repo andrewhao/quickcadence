@@ -28,6 +28,11 @@
     "csv": "^0.4.5"
   },
   "devDependencies": {
+    "bower": "^1.4.1",
+    "brfs": "^1.4.0",
+    "browserify": "^10.2.4",
+    "browserify-fs": "^1.0.0",
+    "filesystem-browserify": "0.0.1",
     "karma": "^0.12.36",
     "karma-chrome-launcher": "^0.1.12",
     "karma-mocha": "^0.1.10",

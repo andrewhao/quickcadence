@@ -1,0 +1,25 @@
+{
+  "name": "sweetcadence",
+  "version": "0.0.0",
+  "homepage": "https://github.com/andrewhao/sweetcadence",
+  "authors": [
+    "Andrew Hao <andrewhao@gmail.com>"
+  ],
+  "description": "Cadence counting app generated from accelerometer data.",
+  "keywords": [
+    "pebble",
+    "accelerometer",
+    "wearable"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "d3": "~3.5.5"
+  }
+}
