@@ -14,7 +14,7 @@ var Baconifier = {
   }
 }
 
-module.exports = Baconifier
+module.exports = Baconifier;
 
 },{"baconjs":3,"csv":28}],2:[function(require,module,exports){
 Bacon = require('baconjs');
@@ -9462,8 +9462,14 @@ var points = "x,y,z\n-24,-48,-840\n-40,-48,-856\n-48,-48,-904\n-56,-48,-912\n-64
 
 var pointStream = new stream.PassThrough();
 pointStream.end(new Buffer(points));
-cadenceCounter.pipe(baconifier.pipe(pointStream));
 
+$(function() {
+  $('body').on('keyup', function() {
+    console.log('hey');
+    $(this).append($('<p>Starting...</p>'))
+    cadenceCounter.pipe(baconifier.pipe(pointStream));
+  });
+});
 
 }).call(this,require("buffer").Buffer)
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"buffer":5,"stream":24}]},{},[33]);
