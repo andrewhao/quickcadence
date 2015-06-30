@@ -14,7 +14,7 @@ var Baconifier = {
   }
 }
 
-module.exports = Baconifier
+module.exports = Baconifier;
 
 },{"baconjs":3,"csv":28}],2:[function(require,module,exports){
 Bacon = require('baconjs');
@@ -30,7 +30,7 @@ var CadenceCounter = {
         )
       });
 
-    var isVelocityChangingStream = combinedStream
+    var cadenceStream = combinedStream
       .slidingWindow(4,4)
       .map(function(arr) {
         var diff = arr[1] - arr[0]
@@ -62,7 +62,7 @@ var CadenceCounter = {
         var cyclesPerMs = 1 / duration
         return cyclesPerMs * 1000 * 60
       })
-      .log()
+    return cadenceStream;
   }
 }
 module.exports = CadenceCounter;
@@ -9453,8 +9453,8 @@ Transformer.prototype._done = function(err, chunks, cb) {
 }).call(this,require('_process'))
 },{"_process":12,"stream":24,"util":27}],33:[function(require,module,exports){
 (function (Buffer){
-var cadenceCounter = require('../../lib/cadenceCounter');
-var baconifier = require('../../lib/baconifier');
+var CadenceCounter = require('../../lib/cadenceCounter');
+var Baconifier = require('../../lib/baconifier');
 
 var stream = require('stream');
 
@@ -9462,7 +9462,7 @@ var points = "x,y,z\n-24,-48,-840\n-40,-48,-856\n-48,-48,-904\n-56,-48,-912\n-64
 
 var pointStream = new stream.PassThrough();
 pointStream.end(new Buffer(points));
-cadenceCounter.pipe(baconifier.pipe(pointStream));
+CadenceCounter.pipe(Baconifier.pipe(pointStream));
 
 
 }).call(this,require("buffer").Buffer)
