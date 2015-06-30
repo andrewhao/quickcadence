@@ -11,3 +11,20 @@ pointStream.end(new Buffer(points));
 var rawStream = Baconifier.pipe(pointStream);
 var cadenceStream = CadenceCounter.pipe(rawStream);
 
+d3.select('body'),
+  WIDTH = 1000,
+  HEIGHT = 500,
+  MARGINS = {
+    top: 20,
+    right: 20,
+    bottom: 20,
+    left: 20
+  }
+
+$(function() {
+  $('body').on('keyup', function() {
+    console.log('hey');
+    $(this).append($('<p>Starting...</p>'))
+    cadenceCounter.pipe(baconifier.pipe(pointStream));
+  });
+});

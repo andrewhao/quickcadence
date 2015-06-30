@@ -4,6 +4,7 @@
   "description": "Cadence detection for accelerometer data.",
   "main": "index.js",
   "scripts": {
+    "build": "echo \"Starting build...\" && browserify -t brfs reference/js/viewer.js > reference/js/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
