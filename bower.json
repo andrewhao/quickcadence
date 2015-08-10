@@ -21,6 +21,7 @@
   ],
   "devDependencies": {
     "d3": "~3.5.5",
-    "jquery": "~2.1.4"
+    "jquery": "~2.1.4",
+    "rickshaw": "~1.5.1"
   }
 }
