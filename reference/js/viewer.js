@@ -12,14 +12,6 @@ var rawStream = Baconifier.pipe(pointStream);
 
 var GraphWidget = {
   render: function() {
-    // set up our data series with 150 random data points
-    var seriesData = [ [], [], [], [], [], [], [], [], [] ];
-    var random = new Rickshaw.Fixtures.RandomData(150);
-
-    for (var i = 0; i < 150; i++) {
-      random.addData(seriesData);
-    }
-
     var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
     // instantiate our graph!
@@ -31,38 +23,12 @@ var GraphWidget = {
       renderer: 'area',
       stroke: true,
       preserve: true,
-      series: [
-        {
-        color: palette.color(),
-        data: seriesData[0],
-        name: 'Moscow'
-      }, {
-        color: palette.color(),
-        data: seriesData[1],
-        name: 'Shanghai'
-      }, {
-        color: palette.color(),
-        data: seriesData[2],
-        name: 'Amsterdam'
-      }, {
-        color: palette.color(),
-        data: seriesData[3],
-        name: 'Paris'
-      }, {
-        color: palette.color(),
-        data: seriesData[4],
-        name: 'Tokyo'
-      }, {
-        color: palette.color(),
-        data: seriesData[5],
-        name: 'London'
-      }, {
-        color: palette.color(),
-        data: seriesData[6],
-        name: 'New York'
-      }
-      ]
-    } );
+      series: new Rickshaw.Series.FixedDuration(
+        [ {x: 0, y: 0, name: "Tempo"} ],
+        palette.color(),
+        { timeBase: 0, timeInterval: 1, maxDataPoints: 200 }
+      )
+    });
 
     graph.render();
 
@@ -128,61 +94,19 @@ var GraphWidget = {
     yAxis.render();
 
 
-    var controls = new RenderControls( {
-      element: document.querySelector('form'),
-      graph: graph
-    } );
-
-    // add some data every so often
-
-    var messages = [
-      "Changed home page welcome message",
-      "Minified JS and CSS",
-      "Changed button color from blue to green",
-      "Refactored SQL query to use indexed columns",
-      "Added additional logging for debugging",
-      "Fixed typo",
-      "Rewrite conditional logic for clarity",
-      "Added documentation for new methods"
-    ];
-
-    setInterval( function() {
-      random.removeData(seriesData);
-      random.addData(seriesData);
-      graph.update();
-    }, 3000 );
-
-    function addAnnotation(force) {
-      if (messages.length > 0 && (force || Math.random() >= 0.95)) {
-        annotator.add(seriesData[2][seriesData[2].length-1].x, messages.shift());
-        annotator.update();
-      }
-    }
-
-    addAnnotation(true);
-    setTimeout( function() { setInterval( addAnnotation, 6000 ) }, 6000 );
-
-    var previewXAxis = new Rickshaw.Graph.Axis.Time({
-      graph: preview.previews[0],
-      timeFixture: new Rickshaw.Fixtures.Time.Local(),
-      ticksTreatment: ticksTreatment
-    });
-
-    previewXAxis.render();
+    return graph;
   }
 };
 
 $(function() {
-  GraphWidget.render()
-});
+  var graph = GraphWidget.render();
 
-$(function() {
   $('body').on('keyup', function(e) {
     var $body = $(this);
     if($(this).data('started') || e.keyCode !== 32) { return true; }
     $(this).data('started', true);
 
-    $(this).append($('<p>Starting...</p>'))
+    //$(document).append($('<p>Starting...</p>'))
 
     rawStream.onValue(function(val) {
       console.log("raw: " + val);
@@ -192,6 +116,15 @@ $(function() {
     var cadenceStream = CadenceCounter.pipe(rawStream);
     cadenceStream.onValue(function(val) {
       console.log("tempo: " + val);
+      var data = {
+        y: val,
+        name: "Tempo",
+        x: new Date().getTime()
+      }
+      try {
+        graph.series.addData(data);
+        graph.render();
+      } catch(e) { }
     });
   });
 });
