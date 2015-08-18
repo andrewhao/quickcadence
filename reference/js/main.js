@@ -22,29 +22,42 @@ module.exports = Baconifier;
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 Bacon = require('baconjs');
 
-var CadenceCounter = {
+var StepDetector = {
   pipe: function(stream) {
-    var combinedStream = stream
+    return stream
+      .slidingWindow(4,4)
+      .map(function(arr) {
+        var diff = arr[1] - arr[0];
+        var changeSignal = (diff > 0) ? 1 : -1;
+        return {"diff": diff, "changeSignal": changeSignal};
+      })
+      .slidingWindow(2,2)
+      .filter(function(arr) {
+        return arr[0].changeSignal !== arr[1].changeSignal;
+      })
+      .debounce(100);
+  }
+};
+
+var PowerConverter = {
+  pipe: function(stream) {
+    return stream
       .map(function(d) {
         return Math.sqrt(
           Math.pow(d.x, 2),
           Math.pow(d.y, 2),
           Math.pow(d.z, 2)
-        )
+        );
       });
+  }
+};
 
-    var cadenceStream = combinedStream
-      .slidingWindow(4,4)
-      .map(function(arr) {
-        var diff = arr[1] - arr[0]
-        var changeSignal = (diff > 0) ? 1 : -1;
-        return {"diff": diff, "changeSignal": changeSignal}
-      })
-      .slidingWindow(2,2)
-      .filter(function(arr) {
-        return arr[0].changeSignal !== arr[1].changeSignal
-      })
-      .debounce(100)
+var CadenceCounter = {
+  pipe: function(stream) {
+    var powerStream = PowerConverter.pipe(stream);
+    var stepStream = StepDetector.pipe(powerStream);
+
+    var cadenceStream = stepStream
       .map(function() {
         return new Date()
       })
@@ -22366,16 +22379,19 @@ $(function() {
     });
 
     var cadenceStream = CadenceCounter.pipe(rawStream);
-    cadenceStream.onValue(function(val) {
-      //console.log("tempo: " + val);
-      var data = {
-        tempo: val
-      }
+
+    var combinedStream = rawStream.zip(cadenceStream, function(raw, cadence) {
+        return { x: raw.x, y: raw.y, z: raw.z, tempo: cadence };
+    });
+
+    combinedStream.onValue(function(val) {
+      console.log("data: " + JSON.stringify(val));
+      var data = val;
       graph.series.addData(data);
       graph.render();
     });
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_78f66ade.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_cc73c190.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"./cadenceGraph":28,"baconjs":3,"buffer":9,"oMfpAn":14,"stream":16}]},{},[29])

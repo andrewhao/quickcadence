@@ -5,19 +5,28 @@ var CadenceGraph = {
     var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
     // instantiate our graph!
+    var graphConfig = {
+      timeBase: (new Date().getTime() / 1000),
+      timeInterval: 250,
+      maxDataPoints: 200
+    };
 
     var graph = new Rickshaw.Graph( {
       element: document.getElementById("chart"),
       renderer: 'area',
       stroke: true,
       preserve: true,
-      series: new Rickshaw.Series.FixedDuration(
-        [ { name: "tempo" } ],
-        palette.color(),
-        { timeBase: (new Date().getTime() / 1000),
-          timeInterval: 250,
-          maxDataPoints: 200 }
-      )
+      series: [
+        new Rickshaw.Series.FixedDuration(
+          [ { name: "tempo" } ],
+          palette.color(),
+          graphConfig
+        ), new Rickshaw.Series.FixedDuration(
+          [ { name: "x" } ],
+          palette.color(),
+          graphConfig
+        )
+      ]
     });
 
     graph.render();

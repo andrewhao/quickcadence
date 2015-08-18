@@ -27,11 +27,14 @@ $(function() {
     });
 
     var cadenceStream = CadenceCounter.pipe(rawStream);
-    cadenceStream.onValue(function(val) {
-      //console.log("tempo: " + val);
-      var data = {
-        tempo: val
-      }
+
+    var combinedStream = rawStream.zip(cadenceStream, function(raw, cadence) {
+        return { x: raw.x, y: raw.y, z: raw.z, tempo: cadence };
+    });
+
+    combinedStream.onValue(function(val) {
+      console.log("data: " + JSON.stringify(val));
+      var data = val;
       graph.series.addData(data);
       graph.render();
     });
