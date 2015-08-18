@@ -22263,20 +22263,23 @@ var CadenceGraph = {
     var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
     // instantiate our graph!
+    var graphConfig = {
+      timeBase: (new Date().getTime() / 1000),
+      timeInterval: 250,
+      maxDataPoints: 100
+    };
 
     var graph = new Rickshaw.Graph( {
       element: document.getElementById("chart"),
-      renderer: 'area',
+      renderer: 'line',
       stroke: true,
       preserve: true,
       series: new Rickshaw.Series.FixedDuration(
         [ { name: "tempo" } ],
-        palette.color(),
-        { timeBase: (new Date().getTime() / 1000),
-          timeInterval: 250,
-          maxDataPoints: 200 }
+        undefined,
+        graphConfig
       )
-    });
+    } );
 
     graph.render();
 
@@ -22285,12 +22288,12 @@ var CadenceGraph = {
     //  element: document.getElementById('preview'),
     //} );
 
-    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-      graph: graph,
-      xFormatter: function(x) {
-        return new Date(x * 1000).toString();
-      }
-    } );
+    //var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+    //  graph: graph,
+    //  xFormatter: function(x) {
+    //    return new Date(x * 1000).toString();
+    //  }
+    //} );
 
     //var annotator = new Rickshaw.Graph.Annotate( {
     //  graph: graph,
@@ -22339,7 +22342,6 @@ var CadenceGraph = {
     } );
 
     yAxis.render();
-
 
     return graph;
   }
@@ -22393,5 +22395,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_cc73c190.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d7587e4d.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"./cadenceGraph":28,"baconjs":3,"buffer":9,"oMfpAn":14,"stream":16}]},{},[29])

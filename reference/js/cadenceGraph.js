@@ -8,26 +8,20 @@ var CadenceGraph = {
     var graphConfig = {
       timeBase: (new Date().getTime() / 1000),
       timeInterval: 250,
-      maxDataPoints: 200
+      maxDataPoints: 100
     };
 
     var graph = new Rickshaw.Graph( {
       element: document.getElementById("chart"),
-      renderer: 'area',
+      renderer: 'line',
       stroke: true,
       preserve: true,
-      series: [
-        new Rickshaw.Series.FixedDuration(
-          [ { name: "tempo" } ],
-          palette.color(),
-          graphConfig
-        ), new Rickshaw.Series.FixedDuration(
-          [ { name: "x" } ],
-          palette.color(),
-          graphConfig
-        )
-      ]
-    });
+      series: new Rickshaw.Series.FixedDuration(
+        [ { name: "tempo" } ],
+        undefined,
+        graphConfig
+      )
+    } );
 
     graph.render();
 
@@ -36,12 +30,12 @@ var CadenceGraph = {
     //  element: document.getElementById('preview'),
     //} );
 
-    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-      graph: graph,
-      xFormatter: function(x) {
-        return new Date(x * 1000).toString();
-      }
-    } );
+    //var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+    //  graph: graph,
+    //  xFormatter: function(x) {
+    //    return new Date(x * 1000).toString();
+    //  }
+    //} );
 
     //var annotator = new Rickshaw.Graph.Annotate( {
     //  graph: graph,
@@ -90,7 +84,6 @@ var CadenceGraph = {
     } );
 
     yAxis.render();
-
 
     return graph;
   }
