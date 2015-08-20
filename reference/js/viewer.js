@@ -1,9 +1,13 @@
 var CadenceCounter = require('../../lib/cadenceCounter');
+var StepDetector = require('../../lib/stepDetector');
+var PowerConverter = require('../../lib/powerConverter');
+var CadenceCounter = require('../../lib/cadenceCounter');
 var Baconifier = require('../../lib/baconifier');
 var fs = require('fs');
 var stream = require('stream');
 var bacon = require('baconjs');
 var CadenceGraph = require('./cadenceGraph');
+var _ = require('underscore');
 
 var points = fs.readFileSync(__dirname + '/samples-1.csv', 'utf-8');
 
@@ -26,11 +30,35 @@ $(function() {
       //$body.append($('<p>Raw: ' + val + '</p>'));
     });
 
-    var cadenceStream = CadenceCounter.pipe(rawStream);
+    var powerStream = PowerConverter.pipe(rawStream);
+    var stepStream = StepDetector.pipe(powerStream);
+    var cadenceStream = CadenceCounter.pipe(stepStream);
 
-    var combinedStream = rawStream.zip(cadenceStream, function(raw, cadence) {
-        return { x: raw.x, y: raw.y, z: raw.z, tempo: cadence };
+    var hasSteppedStream = stepStream.onValue(function(val) {
+      console.log("Step!");
     });
+
+    var combinedStream = powerStream.combine(
+      cadenceStream,
+      function(power, cadence) {
+        return {
+          power: power,
+          tempo: cadence,
+        };
+      }
+    ).combine(rawStream, function(combined, raw) {
+      return _.extend(combined, {
+        xAccel: parseInt(raw.x),
+        yAccel: parseInt(raw.y),
+        zAccel: parseInt(raw.z)
+      });
+    })
+    //.zip(stepStream, function(combined, hasStepped) {
+    //  console.log(hasStepped);
+    //  return _.extend(combined, {
+    //    stepDetected: (hasStepped ? 1000 : -1000)
+    //  })
+    //});
 
     combinedStream.onValue(function(val) {
       console.log("data: " + JSON.stringify(val));

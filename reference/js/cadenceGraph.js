@@ -7,8 +7,8 @@ var CadenceGraph = {
     // instantiate our graph!
     var graphConfig = {
       timeBase: (new Date().getTime() / 1000),
-      timeInterval: 250,
-      maxDataPoints: 100
+      timeInterval: (1/50 * 1000),
+      maxDataPoints: 400
     };
 
     var graph = new Rickshaw.Graph( {
@@ -16,8 +16,15 @@ var CadenceGraph = {
       renderer: 'line',
       stroke: true,
       preserve: true,
+      min: 'auto',
       series: new Rickshaw.Series.FixedDuration(
-        [ { name: "tempo" } ],
+        [ { name: "tempo" },
+          { name: 'power' },
+          { name: 'xAccel' },
+          { name: 'yAccel' },
+          { name: 'zAccel' },
+          { name: 'stepDetected' }
+        ],
         undefined,
         graphConfig
       )
@@ -30,38 +37,38 @@ var CadenceGraph = {
     //  element: document.getElementById('preview'),
     //} );
 
-    //var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-    //  graph: graph,
-    //  xFormatter: function(x) {
-    //    return new Date(x * 1000).toString();
-    //  }
-    //} );
+    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+      graph: graph,
+      xFormatter: function(x) {
+        return new Date(x * 1000).toString();
+      }
+    } );
 
-    //var annotator = new Rickshaw.Graph.Annotate( {
-    //  graph: graph,
-    //  element: document.getElementById('timeline')
-    //} );
+    var annotator = new Rickshaw.Graph.Annotate( {
+      graph: graph,
+      element: document.getElementById('timeline')
+    } );
 
-    //var legend = new Rickshaw.Graph.Legend( {
-    //  graph: graph,
-    //  element: document.getElementById('legend')
+    var legend = new Rickshaw.Graph.Legend( {
+      graph: graph,
+      element: document.getElementById('legend')
 
-    //} );
+    } );
 
-    //var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-    //  graph: graph,
-    //  legend: legend
-    //} );
+    var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+      graph: graph,
+      legend: legend
+    } );
 
-    //var order = new Rickshaw.Graph.Behavior.Series.Order( {
-    //  graph: graph,
-    //  legend: legend
-    //} );
+    var order = new Rickshaw.Graph.Behavior.Series.Order( {
+      graph: graph,
+      legend: legend
+    } );
 
-    //var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-    //  graph: graph,
-    //  legend: legend
-    //} );
+    var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+      graph: graph,
+      legend: legend
+    } );
 
     //var smoother = new Rickshaw.Graph.Smoother( {
     //  graph: graph,
@@ -72,6 +79,7 @@ var CadenceGraph = {
 
     var xAxis = new Rickshaw.Graph.Axis.Time( {
       graph: graph,
+      tickFormat: Rickshaw.Fixtures.Number.formatTime,
       ticksTreatment: ticksTreatment
     } );
 
