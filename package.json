@@ -1,5 +1,5 @@
 {
-  "name": "coolcadence",
+  "name": "quickcadence",
   "version": "0.0.1",
   "description": "Cadence detection for accelerometer data.",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/andrewhao/coolcadence.git"
+    "url": "https://github.com/andrewhao/quickcadence.git"
   },
   "keywords": [
     "accelerometer",
@@ -21,9 +21,9 @@
   "author": "Andrew Hao",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/andrewhao/coolcadence/issues"
+    "url": "https://github.com/andrewhao/quickcadence/issues"
   },
-  "homepage": "https://github.com/andrewhao/coolcadence",
+  "homepage": "https://github.com/andrewhao/quickcadence",
   "dependencies": {
     "baconjs": "^0.7.53",
     "csv": "^0.4.5"
