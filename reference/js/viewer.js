@@ -17,6 +17,9 @@ var rawStream = Baconifier.pipe(pointStream);
 
 $(function() {
   var graph = CadenceGraph.render(document);
+  var annotator = CadenceGraph.annotator(graph);
+  annotator.add(new Date().getTime(), "starting");
+  annotator.update();
 
   $('body').on('keyup', function(e) {
     var $body = $(this);
@@ -35,7 +38,8 @@ $(function() {
     var cadenceStream = CadenceCounter.pipe(stepStream);
 
     var hasSteppedStream = stepStream.onValue(function(val) {
-      console.log("Step!");
+      annotator.add(new Date().getTime() * 1000, "step!");
+      annotator.update();
     });
 
     var combinedStream = powerStream.combine(
@@ -53,15 +57,8 @@ $(function() {
         zAccel: parseInt(raw.z)
       });
     })
-    //.zip(stepStream, function(combined, hasStepped) {
-    //  console.log(hasStepped);
-    //  return _.extend(combined, {
-    //    stepDetected: (hasStepped ? 1000 : -1000)
-    //  })
-    //});
 
     combinedStream.onValue(function(val) {
-      console.log("data: " + JSON.stringify(val));
       var data = val;
       graph.series.addData(data);
       graph.render();

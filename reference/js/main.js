@@ -23880,6 +23880,14 @@ Rickshaw.Series.FixedDuration = Rickshaw.Class.create(Rickshaw.Series, {
 var Rickshaw = require('rickshaw');
 
 var CadenceGraph = {
+  annotator: function(graph) {
+    var annotator = new Rickshaw.Graph.Annotate( {
+      graph: graph,
+      element: document.getElementById('timeline')
+    } );
+    return annotator;
+  },
+
   render: function(document) {
     var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
@@ -23921,11 +23929,6 @@ var CadenceGraph = {
       xFormatter: function(x) {
         return new Date(x * 1000).toString();
       }
-    } );
-
-    var annotator = new Rickshaw.Graph.Annotate( {
-      graph: graph,
-      element: document.getElementById('timeline')
     } );
 
     var legend = new Rickshaw.Graph.Legend( {
@@ -24000,6 +24003,9 @@ var rawStream = Baconifier.pipe(pointStream);
 
 $(function() {
   var graph = CadenceGraph.render(document);
+  var annotator = CadenceGraph.annotator(graph);
+  annotator.add(new Date().getTime(), "starting");
+  annotator.update();
 
   $('body').on('keyup', function(e) {
     var $body = $(this);
@@ -24018,7 +24024,8 @@ $(function() {
     var cadenceStream = CadenceCounter.pipe(stepStream);
 
     var hasSteppedStream = stepStream.onValue(function(val) {
-      console.log("Step!");
+      annotator.add(new Date().getTime() * 1000, "step!");
+      annotator.update();
     });
 
     var combinedStream = powerStream.combine(
@@ -24036,15 +24043,8 @@ $(function() {
         zAccel: parseInt(raw.z)
       });
     })
-    //.zip(stepStream, function(combined, hasStepped) {
-    //  console.log(hasStepped);
-    //  return _.extend(combined, {
-    //    stepDetected: (hasStepped ? 1000 : -1000)
-    //  })
-    //});
 
     combinedStream.onValue(function(val) {
-      console.log("data: " + JSON.stringify(val));
       var data = val;
       graph.series.addData(data);
       graph.render();
@@ -24052,5 +24052,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_e4401f.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d88d4dcf.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"./cadenceGraph":31,"baconjs":5,"buffer":11,"oMfpAn":16,"stream":18,"underscore":30}]},{},[32])

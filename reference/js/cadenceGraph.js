@@ -1,6 +1,14 @@
 var Rickshaw = require('rickshaw');
 
 var CadenceGraph = {
+  annotator: function(graph) {
+    var annotator = new Rickshaw.Graph.Annotate( {
+      graph: graph,
+      element: document.getElementById('timeline')
+    } );
+    return annotator;
+  },
+
   render: function(document) {
     var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
 
@@ -42,11 +50,6 @@ var CadenceGraph = {
       xFormatter: function(x) {
         return new Date(x * 1000).toString();
       }
-    } );
-
-    var annotator = new Rickshaw.Graph.Annotate( {
-      graph: graph,
-      element: document.getElementById('timeline')
     } );
 
     var legend = new Rickshaw.Graph.Legend( {
