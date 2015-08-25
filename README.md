@@ -7,3 +7,9 @@ Cadence detection for event-driven accelerometer data
 ## Data harness for your accelerometer data
 
 Currently building out the visualization framework to tweak data.
+
+### Findings
+
+* Build graph framework
+* Discover that some axes are better suited for run motion than others
+* Rickshaw is hard

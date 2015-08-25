@@ -54,11 +54,7 @@ var PowerConverter = {
   pipe: function(stream) {
     return stream
       .map(function(d) {
-        return Math.sqrt(
-          Math.pow(d.x, 2),
-          Math.pow(d.y, 2),
-          Math.pow(d.z, 2)
-        );
+        return d.x;
       });
   }
 };
@@ -81,7 +77,7 @@ var StepDetector = {
       .filter(function(arr) {
         return arr[0].changeSignal !== arr[1].changeSignal;
       })
-      .debounce(100);
+      .debounce(150);
   }
 };
 
@@ -91,7 +87,7 @@ module.exports = StepDetector;
 },{"buffer":11,"oMfpAn":16}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 (function() {
-  var Bacon, BufferingSource, Bus, CompositeUnsubscribe, ConsumingSource, Desc, Dispatcher, End, Error, Event, EventStream, Exception, Initial, Next, None, Observable, Property, PropertyDispatcher, Some, Source, UpdateBarrier, _, addPropertyInitValueToStream, argumentsToObservables, argumentsToObservablesAndFunction, assert, assertArray, assertEventStream, assertFunction, assertNoArguments, assertObservable, assertObservableIsProperty, assertString, cloneArray, constantToFunction, containsDuplicateDeps, convertArgsToFunction, describe, endEvent, eventIdCounter, eventMethods, findDeps, findHandlerMethods, flatMap_, former, idCounter, initialEvent, isArray, isFieldKey, isObservable, latter, liftCallback, makeFunction, makeFunctionArgs, makeFunction_, makeObservable, makeSpawner, nextEvent, nop, partiallyApplied, recursionDepth, ref, registerObs, spys, toCombinator, toEvent, toFieldExtractor, toFieldKey, toOption, toSimpleExtractor, valueAndEnd, withDesc, withMethodCallSupport,
+  var Bacon, BufferingSource, Bus, CompositeUnsubscribe, ConsumingSource, Desc, Dispatcher, End, Error, Event, EventStream, Exception, Initial, Next, None, Observable, Property, PropertyDispatcher, Some, Source, UpdateBarrier, _, addPropertyInitValueToStream, assert, assertArray, assertEventStream, assertFunction, assertNoArguments, assertObservable, assertObservableIsProperty, assertString, cloneArray, constantToFunction, containsDuplicateDeps, convertArgsToFunction, describe, endEvent, eventIdCounter, eventMethods, findDeps, findHandlerMethods, flatMap_, former, idCounter, initialEvent, isArray, isFieldKey, isObservable, latter, liftCallback, makeFunction, makeFunctionArgs, makeFunction_, makeObservable, makeSpawner, nextEvent, nop, partiallyApplied, recursionDepth, ref, registerObs, spys, toCombinator, toEvent, toFieldExtractor, toFieldKey, toOption, toSimpleExtractor, valueAndEnd, withDesc, withMethodCallSupport,
     hasProp = {}.hasOwnProperty,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     slice = [].slice,
@@ -103,7 +99,7 @@ module.exports = StepDetector;
     }
   };
 
-  Bacon.version = '0.7.71';
+  Bacon.version = '0.7.65';
 
   Exception = (typeof global !== "undefined" && global !== null ? global : this).Error;
 
@@ -1643,6 +1639,7 @@ module.exports = StepDetector;
             var reply;
             reply = flushWhileTriggers();
             if (ends) {
+              ends = false;
               if (_.all(sources, cannotSync) || _.all(pats, cannotMatch)) {
                 reply = Bacon.noMore;
                 sink(endEvent());
@@ -1950,25 +1947,12 @@ module.exports = StepDetector;
     });
   };
 
-  argumentsToObservables = function(args) {
-    if (isArray(args[0])) {
-      return args[0];
-    } else {
-      return Array.prototype.slice.call(args);
-    }
-  };
-
-  argumentsToObservablesAndFunction = function(args) {
-    if (_.isFunction(args[0])) {
-      return [argumentsToObservables(Array.prototype.slice.call(args, 1)), args[0]];
-    } else {
-      return [argumentsToObservables(Array.prototype.slice.call(args, 0, args.length - 1)), _.last(args)];
-    }
-  };
-
   Bacon.combineAsArray = function() {
     var index, j, len1, s, sources, stream, streams;
-    streams = argumentsToObservables(arguments);
+    streams = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    if (streams.length === 1 && isArray(streams[0])) {
+      streams = streams[0];
+    }
     for (index = j = 0, len1 = streams.length; j < len1; index = ++j) {
       stream = streams[index];
       if (!(isObservable(stream))) {
@@ -2002,11 +1986,79 @@ module.exports = StepDetector;
   };
 
   Bacon.combineWith = function() {
-    var f, ref, streams;
-    ref = argumentsToObservablesAndFunction(arguments), streams = ref[0], f = ref[1];
+    var f, streams;
+    f = arguments[0], streams = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     return withDesc(new Bacon.Desc(Bacon, "combineWith", [f].concat(slice.call(streams))), Bacon.combineAsArray(streams).map(function(values) {
       return f.apply(null, values);
     }));
+  };
+
+  Bacon.combineTemplate = function(template) {
+    var applyStreamValue, combinator, compile, compileTemplate, constantValue, current, funcs, mkContext, setValue, streams;
+    funcs = [];
+    streams = [];
+    current = function(ctxStack) {
+      return ctxStack[ctxStack.length - 1];
+    };
+    setValue = function(ctxStack, key, value) {
+      return current(ctxStack)[key] = value;
+    };
+    applyStreamValue = function(key, index) {
+      return function(ctxStack, values) {
+        return setValue(ctxStack, key, values[index]);
+      };
+    };
+    constantValue = function(key, value) {
+      return function(ctxStack) {
+        return setValue(ctxStack, key, value);
+      };
+    };
+    mkContext = function(template) {
+      if (isArray(template)) {
+        return [];
+      } else {
+        return {};
+      }
+    };
+    compile = function(key, value) {
+      var popContext, pushContext;
+      if (isObservable(value)) {
+        streams.push(value);
+        return funcs.push(applyStreamValue(key, streams.length - 1));
+      } else if (value === Object(value) && typeof value !== "function" && !(value instanceof RegExp) && !(value instanceof Date)) {
+        pushContext = function(key) {
+          return function(ctxStack) {
+            var newContext;
+            newContext = mkContext(value);
+            setValue(ctxStack, key, newContext);
+            return ctxStack.push(newContext);
+          };
+        };
+        popContext = function(ctxStack) {
+          return ctxStack.pop();
+        };
+        funcs.push(pushContext(key));
+        compileTemplate(value);
+        return funcs.push(popContext);
+      } else {
+        return funcs.push(constantValue(key, value));
+      }
+    };
+    compileTemplate = function(template) {
+      return _.each(template, compile);
+    };
+    compileTemplate(template);
+    combinator = function(values) {
+      var ctxStack, f, j, len1, rootContext;
+      rootContext = mkContext(template);
+      ctxStack = [rootContext];
+      for (j = 0, len1 = funcs.length; j < len1; j++) {
+        f = funcs[j];
+        f(ctxStack, values);
+      }
+      return rootContext;
+    };
+    return withDesc(new Bacon.Desc(Bacon, "combineTemplate", [template]), Bacon.combineAsArray(streams).map(combinator));
   };
 
   Bacon.Observable.prototype.combine = function(other, f) {
@@ -2014,6 +2066,12 @@ module.exports = StepDetector;
     combinator = toCombinator(f);
     return withDesc(new Bacon.Desc(this, "combine", [other, f]), Bacon.combineAsArray(this, other).map(function(values) {
       return combinator(values[0], values[1]);
+    }));
+  };
+
+  Bacon.Observable.prototype.decode = function(cases) {
+    return withDesc(new Bacon.Desc(this, "decode", [cases]), this.combine(Bacon.combineTemplate(cases), function(key, values) {
+      return values[key];
     }));
   };
 
@@ -2131,15 +2189,14 @@ module.exports = StepDetector;
       end: void 0,
       values: [],
       flush: function() {
-        var reply, valuesToPush;
+        var reply;
         if (this.scheduled) {
           Bacon.scheduler.clearTimeout(this.scheduled);
           this.scheduled = null;
         }
         if (this.values.length > 0) {
-          valuesToPush = this.values;
+          reply = this.push(nextEvent(this.values));
           this.values = [];
-          reply = this.push(nextEvent(valuesToPush));
           if (this.end != null) {
             return this.push(this.end);
           } else if (reply !== Bacon.noMore) {
@@ -2519,74 +2576,6 @@ module.exports = StepDetector;
     });
   });
 
-  Bacon.combineTemplate = function(template) {
-    var applyStreamValue, combinator, compile, compileTemplate, constantValue, current, funcs, mkContext, pushContext, setValue, streams;
-    funcs = [];
-    streams = [];
-    current = function(ctxStack) {
-      return ctxStack[ctxStack.length - 1];
-    };
-    setValue = function(ctxStack, key, value) {
-      return current(ctxStack)[key] = value;
-    };
-    applyStreamValue = function(key, index) {
-      return function(ctxStack, values) {
-        return setValue(ctxStack, key, values[index]);
-      };
-    };
-    constantValue = function(key, value) {
-      return function(ctxStack) {
-        return setValue(ctxStack, key, value);
-      };
-    };
-    mkContext = function(template) {
-      if (isArray(template)) {
-        return [];
-      } else {
-        return {};
-      }
-    };
-    pushContext = function(key, value) {
-      return function(ctxStack) {
-        var newContext;
-        newContext = mkContext(value);
-        setValue(ctxStack, key, newContext);
-        return ctxStack.push(newContext);
-      };
-    };
-    compile = function(key, value) {
-      var popContext;
-      if (isObservable(value)) {
-        streams.push(value);
-        return funcs.push(applyStreamValue(key, streams.length - 1));
-      } else if (value === Object(value) && typeof value !== "function" && !(value instanceof RegExp) && !(value instanceof Date)) {
-        popContext = function(ctxStack) {
-          return ctxStack.pop();
-        };
-        funcs.push(pushContext(key, value));
-        compileTemplate(value);
-        return funcs.push(popContext);
-      } else {
-        return funcs.push(constantValue(key, value));
-      }
-    };
-    compileTemplate = function(template) {
-      return _.each(template, compile);
-    };
-    compileTemplate(template);
-    combinator = function(values) {
-      var ctxStack, f, j, len1, rootContext;
-      rootContext = mkContext(template);
-      ctxStack = [rootContext];
-      for (j = 0, len1 = funcs.length; j < len1; j++) {
-        f = funcs[j];
-        f(ctxStack, values);
-      }
-      return rootContext;
-    };
-    return withDesc(new Bacon.Desc(Bacon, "combineTemplate", [template]), Bacon.combineAsArray(streams).map(combinator));
-  };
-
   addPropertyInitValueToStream = function(property, stream) {
     var justInitValue;
     justInitValue = new EventStream(describe(property, "justInitValue"), function(sink) {
@@ -2709,17 +2698,10 @@ module.exports = StepDetector;
     }));
   };
 
-  Bacon.Observable.prototype.decode = function(cases) {
-    return withDesc(new Bacon.Desc(this, "decode", [cases]), this.combine(Bacon.combineTemplate(cases), function(key, values) {
-      return values[key];
-    }));
-  };
-
   Bacon.Observable.prototype.scan = function(seed, f) {
-    var acc, initHandled, resultProperty, subscribe;
+    var acc, resultProperty, subscribe;
     f = toCombinator(f);
     acc = toOption(seed);
-    initHandled = false;
     subscribe = (function(_this) {
       return function(sink) {
         var initSent, reply, sendInit, unsub;
@@ -2729,7 +2711,7 @@ module.exports = StepDetector;
         sendInit = function() {
           if (!initSent) {
             return acc.forEach(function(value) {
-              initSent = initHandled = true;
+              initSent = true;
               reply = sink(new Initial(function() {
                 return value;
               }));
@@ -2743,13 +2725,13 @@ module.exports = StepDetector;
         unsub = _this.dispatcher.subscribe(function(event) {
           var next, prev;
           if (event.hasValue()) {
-            if (initHandled && event.isInitial()) {
+            if (initSent && event.isInitial()) {
               return Bacon.more;
             } else {
               if (!event.isInitial()) {
                 sendInit();
               }
-              initSent = initHandled = true;
+              initSent = true;
               prev = acc.getOrElse(void 0);
               next = f(prev, event.value());
               acc = new Some(next);
@@ -2947,32 +2929,6 @@ module.exports = StepDetector;
     }), poll));
   };
 
-  Bacon.Observable.prototype.groupBy = function(keyF, limitF) {
-    var src, streams;
-    if (limitF == null) {
-      limitF = Bacon._.id;
-    }
-    streams = {};
-    src = this;
-    return src.filter(function(x) {
-      return !streams[keyF(x)];
-    }).map(function(x) {
-      var data, key, limited, similar;
-      key = keyF(x);
-      similar = src.filter(function(x) {
-        return keyF(x) === key;
-      });
-      data = Bacon.once(x).concat(similar);
-      limited = limitF(data, x).withHandler(function(event) {
-        this.push(event);
-        if (event.isEnd()) {
-          return delete streams[key];
-        }
-      });
-      return streams[key] = limited;
-    });
-  };
-
   Bacon.fromArray = function(values) {
     var i;
     assertArray(values);
@@ -3018,14 +2974,14 @@ module.exports = StepDetector;
   };
 
   Bacon.EventStream.prototype.holdWhen = function(valve) {
-    var bufferedValues, onHold, src;
+    var bufferedValues, composite, onHold, src, subscribed;
+    composite = new CompositeUnsubscribe();
     onHold = false;
     bufferedValues = [];
+    subscribed = false;
     src = this;
     return new EventStream(new Bacon.Desc(this, "holdWhen", [valve]), function(sink) {
-      var composite, endIfBothEnded, subscribed;
-      composite = new CompositeUnsubscribe();
-      subscribed = false;
+      var endIfBothEnded;
       endIfBothEnded = function(unsub) {
         if (typeof unsub === "function") {
           unsub();
@@ -3121,7 +3077,10 @@ module.exports = StepDetector;
 
   Bacon.mergeAll = function() {
     var streams;
-    streams = argumentsToObservables(arguments);
+    streams = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    if (isArray(streams[0])) {
+      streams = streams[0];
+    }
     if (streams.length) {
       return new EventStream(new Bacon.Desc(Bacon, "mergeAll", streams), function(sink) {
         var ends, sinks, smartSink;
@@ -3426,7 +3385,10 @@ module.exports = StepDetector;
 
   Bacon.zipAsArray = function() {
     var streams;
-    streams = argumentsToObservables(arguments);
+    streams = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    if (isArray(streams[0])) {
+      streams = streams[0];
+    }
     return withDesc(new Bacon.Desc(Bacon, "zipAsArray", streams), Bacon.zipWith(streams, function() {
       var xs;
       xs = 1 <= arguments.length ? slice.call(arguments, 0) : [];
@@ -3436,7 +3398,10 @@ module.exports = StepDetector;
 
   Bacon.zipWith = function() {
     var f, ref1, streams;
-    ref1 = argumentsToObservablesAndFunction(arguments), streams = ref1[0], f = ref1[1];
+    f = arguments[0], streams = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+    if (!_.isFunction(f)) {
+      ref1 = [f, streams[0]], streams = ref1[0], f = ref1[1];
+    }
     streams = _.map((function(s) {
       return s.toEventStream();
     }), streams);
@@ -3748,7 +3713,7 @@ Generator.bool = function(gen) {
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/csv/node_modules/csv-generate/lib/index.js","/../../node_modules/csv/node_modules/csv-generate/lib")
 },{"buffer":11,"oMfpAn":16,"stream":18,"util":26}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-// Generated by CoffeeScript 1.9.3
+// Generated by CoffeeScript 1.9.1
 var Parser, StringDecoder, stream, util;
 
 stream = require('stream');
@@ -3791,7 +3756,7 @@ module.exports = function() {
     options = {};
   }
   parser = new Parser(options);
-  if (data != null) {
+  if (data) {
     process.nextTick(function() {
       parser.write(data);
       return parser.end();
@@ -3826,7 +3791,7 @@ module.exports = function() {
 };
 
 Parser = function(options) {
-  var base, base1, base10, base11, base12, base2, base3, base4, base5, base6, base7, base8, base9, k, v;
+  var base, base1, base10, base11, base2, base3, base4, base5, base6, base7, base8, base9, k, v;
   if (options == null) {
     options = {};
   }
@@ -3870,18 +3835,13 @@ Parser = function(options) {
   if ((base10 = this.options).auto_parse == null) {
     base10.auto_parse = false;
   }
-  if ((base11 = this.options).auto_parse_date == null) {
-    base11.auto_parse_date = false;
-  }
-  if ((base12 = this.options).skip_empty_lines == null) {
-    base12.skip_empty_lines = false;
+  if ((base11 = this.options).skip_empty_lines == null) {
+    base11.skip_empty_lines = false;
   }
   this.lines = 0;
   this.count = 0;
-  this.is_int = /^(\-|\+)?([1-9]+[0-9]*)$/;
-  this.is_float = function(value) {
-    return (value - parseFloat(value) + 1) >= 0;
-  };
+  this.regexp_int = /^(\-|\+)?([1-9]+[0-9]*)$/;
+  this.regexp_float = /^(\-|\+)?([0-9]+(\.[0-9]+)?([eE][0-9]+)?|Infinity)$/;
   this.decoder = new StringDecoder();
   this.buf = '';
   this.quoting = false;
@@ -3957,41 +3917,7 @@ Parser.prototype.__push = function(line) {
 };
 
 Parser.prototype.__write = function(chars, end, callback) {
-  var acceptedLength, areNextCharsDelimiter, areNextCharsRowDelimiters, auto_parse, char, escapeIsQuote, i, isDelimiter, isEscape, isNextCharAComment, isQuote, isRowDelimiter, is_float, is_int, l, ltrim, nextCharPos, ref, results, rowDelimiter, rowDelimiterLength, rtrim, wasCommenting;
-  is_int = (function(_this) {
-    return function(value) {
-      if (typeof _this.is_int === 'function') {
-        return _this.is_int(value);
-      } else {
-        return _this.is_int.test(value);
-      }
-    };
-  })(this);
-  is_float = (function(_this) {
-    return function(value) {
-      if (typeof _this.is_float === 'function') {
-        return _this.is_float(value);
-      } else {
-        return _this.is_float.test(value);
-      }
-    };
-  })(this);
-  auto_parse = (function(_this) {
-    return function(value) {
-      var m;
-      if (_this.options.auto_parse && is_int(_this.field)) {
-        _this.field = parseInt(_this.field);
-      } else if (_this.options.auto_parse && is_float(_this.field)) {
-        _this.field = parseFloat(_this.field);
-      } else if (_this.options.auto_parse && _this.options.auto_parse_date) {
-        m = Date.parse(_this.field);
-        if (!isNaN(m)) {
-          _this.field = new Date(m);
-        }
-      }
-      return _this.field;
-    };
-  })(this);
+  var acceptedLength, areNextCharsDelimiter, areNextCharsRowDelimiters, char, escapeIsQuote, i, isDelimiter, isEscape, isNextCharAComment, isQuote, isRowDelimiter, l, ltrim, nextCharPos, ref, results, rowDelimiter, rowDelimiterLength, rtrim, wasCommenting;
   ltrim = this.options.trim || this.options.ltrim;
   rtrim = this.options.trim || this.options.rtrim;
   chars = this.buf + chars;
@@ -4057,7 +3983,7 @@ Parser.prototype.__write = function(chars, end, callback) {
           this.closingQuote = this.options.quote.length;
           i++;
           if (end && i === l) {
-            this.line.push(auto_parse(this.field));
+            this.line.push(this.field);
           }
           continue;
         }
@@ -4094,7 +4020,13 @@ Parser.prototype.__write = function(chars, end, callback) {
           this.field = this.field.trimRight();
         }
       }
-      this.line.push(auto_parse(this.field));
+      if (this.options.auto_parse && this.regexp_int.test(this.field)) {
+        this.line.push(parseInt(this.field));
+      } else if (this.options.auto_parse && this.regexp_float.test(this.field)) {
+        this.line.push(parseFloat(this.field));
+      } else {
+        this.line.push(this.field);
+      }
       this.closingQuote = 0;
       this.field = '';
       if (isDelimiter) {
@@ -4120,14 +4052,14 @@ Parser.prototype.__write = function(chars, end, callback) {
         if (this.options.trim || this.options.rtrim) {
           this.field = this.field.trimRight();
         }
-        this.line.push(auto_parse(this.field));
+        this.line.push(this.field);
       }
       i++;
     } else if (!this.commenting) {
       this.field += char;
       i++;
       if (end && i === l) {
-        this.line.push(auto_parse(this.field));
+        this.line.push(this.field);
       }
     } else {
       i++;
@@ -23880,10 +23812,10 @@ Rickshaw.Series.FixedDuration = Rickshaw.Class.create(Rickshaw.Series, {
 var Rickshaw = require('rickshaw');
 
 var CadenceGraph = {
-  annotator: function(graph) {
+  annotator: function(graph, element) {
     var annotator = new Rickshaw.Graph.Annotate( {
       graph: graph,
-      element: document.getElementById('timeline')
+      element: element
     } );
     return annotator;
   },
@@ -24003,9 +23935,11 @@ var rawStream = Baconifier.pipe(pointStream);
 
 $(function() {
   var graph = CadenceGraph.render(document);
-  var annotator = CadenceGraph.annotator(graph);
+  var annotator = CadenceGraph.annotator(graph, document.getElementById('timeline'));
   annotator.add(new Date().getTime(), "starting");
   annotator.update();
+
+  var dashboardWidget = $('.dashboard-widget .number');
 
   $('body').on('keyup', function(e) {
     var $body = $(this);
@@ -24024,7 +23958,9 @@ $(function() {
     var cadenceStream = CadenceCounter.pipe(stepStream);
 
     var hasSteppedStream = stepStream.onValue(function(val) {
-      annotator.add(new Date().getTime() * 1000, "step!");
+      var timeVal = new Date().getTime() / 1000
+      console.log("timeVal: " + timeVal);
+      annotator.add(timeVal, "step!");
       annotator.update();
     });
 
@@ -24048,9 +23984,11 @@ $(function() {
       var data = val;
       graph.series.addData(data);
       graph.render();
+
+      dashboardWidget.text(val.tempo);
     });
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d88d4dcf.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f815e8ba.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"./cadenceGraph":31,"baconjs":5,"buffer":11,"oMfpAn":16,"stream":18,"underscore":30}]},{},[32])

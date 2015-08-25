@@ -1,10 +1,10 @@
 var Rickshaw = require('rickshaw');
 
 var CadenceGraph = {
-  annotator: function(graph) {
+  annotator: function(graph, element) {
     var annotator = new Rickshaw.Graph.Annotate( {
       graph: graph,
-      element: document.getElementById('timeline')
+      element: element
     } );
     return annotator;
   },
