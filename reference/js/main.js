@@ -10,7 +10,7 @@ var Baconifier = {
     var parser = csv.parse({delimeter: ",", columns: true});
     var rawStream = Bacon
                     .fromEvent(stream.pipe(parser), 'data')
-                    .bufferingThrottle(1/50 * 1000);
+                    .bufferingThrottle(1/50 * 10000);
     return rawStream;
   }
 }
@@ -34,10 +34,6 @@ var CadenceCounter = {
         return (tlast - t1) / times.length
       })
       .map(function(duration) {
-        // ms per cycle
-        return duration * 2
-      })
-      .map(function(duration) {
         // cycles per ms
         var cyclesPerMs = 1 / duration
         return cyclesPerMs * 1000 * 60
@@ -54,7 +50,7 @@ var PowerConverter = {
   pipe: function(stream) {
     return stream
       .map(function(d) {
-        return d.x;
+        return parseInt(d.x, 10);
       });
   }
 };
@@ -77,7 +73,7 @@ var StepDetector = {
       .filter(function(arr) {
         return arr[0].changeSignal !== arr[1].changeSignal;
       })
-      .debounce(150);
+      .debounce(100)
   }
 };
 
@@ -23839,10 +23835,10 @@ var CadenceGraph = {
       series: new Rickshaw.Series.FixedDuration(
         [ { name: "tempo" },
           { name: 'power' },
-          { name: 'xAccel' },
-          { name: 'yAccel' },
-          { name: 'zAccel' },
-          { name: 'stepDetected' }
+          //{ name: 'xAccel' },
+          //{ name: 'yAccel' },
+          //{ name: 'zAccel' },
+          //{ name: 'stepDetected' }
         ],
         undefined,
         graphConfig
@@ -23959,7 +23955,6 @@ $(function() {
 
     var hasSteppedStream = stepStream.onValue(function(val) {
       var timeVal = new Date().getTime() / 1000
-      console.log("timeVal: " + timeVal);
       annotator.add(timeVal, "step!");
       annotator.update();
     });
@@ -23972,16 +23967,10 @@ $(function() {
           tempo: cadence,
         };
       }
-    ).combine(rawStream, function(combined, raw) {
-      return _.extend(combined, {
-        xAccel: parseInt(raw.x),
-        yAccel: parseInt(raw.y),
-        zAccel: parseInt(raw.z)
-      });
-    })
-
+    )
     combinedStream.onValue(function(val) {
       var data = val;
+      console.log(JSON.stringify(data))
       graph.series.addData(data);
       graph.render();
 
@@ -23990,5 +23979,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f815e8ba.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_727f9b90.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"./cadenceGraph":31,"baconjs":5,"buffer":11,"oMfpAn":16,"stream":18,"underscore":30}]},{},[32])

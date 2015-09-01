@@ -41,7 +41,6 @@ $(function() {
 
     var hasSteppedStream = stepStream.onValue(function(val) {
       var timeVal = new Date().getTime() / 1000
-      console.log("timeVal: " + timeVal);
       annotator.add(timeVal, "step!");
       annotator.update();
     });
@@ -54,16 +53,10 @@ $(function() {
           tempo: cadence,
         };
       }
-    ).combine(rawStream, function(combined, raw) {
-      return _.extend(combined, {
-        xAccel: parseInt(raw.x),
-        yAccel: parseInt(raw.y),
-        zAccel: parseInt(raw.z)
-      });
-    })
-
+    )
     combinedStream.onValue(function(val) {
       var data = val;
+      console.log(JSON.stringify(data))
       graph.series.addData(data);
       graph.render();
 

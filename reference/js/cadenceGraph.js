@@ -28,10 +28,10 @@ var CadenceGraph = {
       series: new Rickshaw.Series.FixedDuration(
         [ { name: "tempo" },
           { name: 'power' },
-          { name: 'xAccel' },
-          { name: 'yAccel' },
-          { name: 'zAccel' },
-          { name: 'stepDetected' }
+          //{ name: 'xAccel' },
+          //{ name: 'yAccel' },
+          //{ name: 'zAccel' },
+          //{ name: 'stepDetected' }
         ],
         undefined,
         graphConfig
