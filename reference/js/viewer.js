@@ -16,6 +16,11 @@ pointStream.end(new Buffer(points));
 var rawStream = Baconifier.pipe(pointStream);
 
 $(function() {
+  var $stopper = $('button#stopper')
+                   .asEventStream('click')
+                   .onValue(function(e) {
+                     debugger;
+                   })
   var graph = CadenceGraph.render(document);
   var annotator = CadenceGraph.annotator(graph, document.getElementById('timeline'));
   annotator.add(new Date().getTime(), "starting");
@@ -28,20 +33,13 @@ $(function() {
     if($(this).data('started') || e.keyCode !== 32) { return true; }
     $(this).data('started', true);
 
-    //$(document).append($('<p>Starting...</p>'))
-
-    rawStream.onValue(function(val) {
-      //console.log("raw: " + val);
-      //$body.append($('<p>Raw: ' + val + '</p>'));
-    });
-
     var powerStream = PowerConverter.pipe(rawStream);
     var stepStream = StepDetector.pipe(powerStream);
     var cadenceStream = CadenceCounter.pipe(stepStream);
 
     var hasSteppedStream = stepStream.onValue(function(val) {
-      debugger;
       var timeVal = new Date().getTime() / 1000
+      console.log(timeVal);
       annotator.add(timeVal, "step!");
       annotator.update();
     });
@@ -54,10 +52,15 @@ $(function() {
           tempo: cadence,
         };
       }
-    )
+    ).combine(rawStream, function(combined, raw) {
+      return _.extend(combined, {
+        xAccel: parseInt(raw.x),
+        yAccel: parseInt(raw.y),
+        zAccel: parseInt(raw.z)
+      });
+    });
     combinedStream.onValue(function(val) {
       var data = val;
-      console.log(JSON.stringify(data))
       graph.series.addData(data);
       graph.render();
 

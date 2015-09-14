@@ -10,7 +10,7 @@ var Baconifier = {
     var parser = csv.parse({delimeter: ",", columns: true});
     var rawStream = Bacon
                     .fromEvent(stream.pipe(parser), 'data')
-                    .bufferingThrottle(1/50 * 10000);
+                    .bufferingThrottle(1/50 * 1000);
     return rawStream;
   }
 }
@@ -20,23 +20,28 @@ module.exports = Baconifier;
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../lib/baconifier.js","/../../lib")
 },{"baconjs":5,"buffer":11,"csv":6,"oMfpAn":16}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+CYCLE_SAMPLE_INSTANCES = 6
 var CadenceCounter = {
   pipe: function(stream) {
     var cadenceStream = stream
-      .map(function() {
+      .map(function(sample) {
         return new Date()
       })
-      .slidingWindow(10, 2)
+      .slidingWindow(CYCLE_SAMPLE_INSTANCES, CYCLE_SAMPLE_INSTANCES)
       .map(function(times) {
         var t1 = times[0]
         var tlast = times[times.length - 1]
         // ms per event
-        return (tlast - t1) / times.length
+        var msPerEvent = (tlast - t1) / times.length
+        // 2 "event"s, a min and a max, per period.
+        var msPerPeriod = msPerEvent * 2
+        return msPerPeriod;
       })
       .map(function(duration) {
-        // cycles per ms
-        var cyclesPerMs = 1 / duration
-        return cyclesPerMs * 1000 * 60
+        // periods per ms
+        var periodsPerMs = 1 / duration
+        // periods per minute
+        return periodsPerMs * 1000 * 60
       })
     return cadenceStream;
   }
@@ -50,8 +55,11 @@ var PowerConverter = {
   pipe: function(stream) {
     return stream
       .map(function(d) {
-        var rawMagnitude = Math.sqrt(Math.pow(d.x, 2), Math.pow(d.y, 2), Math.pow(d.z, 2));
-        return rawMagnitude;
+        //var rawMagnitude = Math.sqrt(Math.pow(d.x, 2), Math.pow(d.y, 2), Math.pow(d.z, 2));
+        //return rawMagnitude;
+        //
+        var val = parseInt(d.y, 10);
+        return val < 0 ? 0 : val;
       });
   }
 };
@@ -61,33 +69,38 @@ module.exports = PowerConverter;
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../lib/powerConverter.js","/../../lib")
 },{"buffer":11,"oMfpAn":16}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-ACCEL_THRESHOLD_MIN = 100;
+ACCEL_CHANGE_THRESHOLD = 100;
 
 var StepDetector = {
   pipe: function(stream) {
     // Fire an event every time acceleration changes from positive to negative
     var diffDirectionStream = stream
-      .slidingWindow(4,4)
+      .map(function(v) {
+        console.log("original: " + v);
+        return v;
+      })
+      .slidingWindow(2,2)
       .map(function(arr) {
         var diff = arr[1] - arr[0];
-        var changeSignal = (diff > 0) ? 1 : -1;
+        return diff
+      })
+      .filter(function(diff) {
+        return Math.abs(diff) > ACCEL_CHANGE_THRESHOLD;
+      })
+      .map(function(diff) {
+        var changeSignal = diff > 0;
         return {"diff": diff, "changeSignal": changeSignal};
       })
       .slidingWindow(2,2)
       .filter(function(arr) {
         return arr[0].changeSignal !== arr[1].changeSignal;
       })
+      .map(function(v) {
+        console.log(v);
+        return v;
+      });
 
-    // Does any point in this window fall between the zero-acceleration graph?
-    var zeroAccelStream = stream
-      .slidingWindow(4, 4)
-      .filter(function(arr) {
-        return arr.reduce(function(acc, point) {
-          return acc || (point < ACCEL_THRESHOLD_MIN)
-        }, false);
-      })
-      .debounce(200);
-    return zeroAccelStream;
+    return diffDirectionStream;
   }
 };
 
@@ -23849,9 +23862,9 @@ var CadenceGraph = {
       series: new Rickshaw.Series.FixedDuration(
         [ { name: "tempo" },
           { name: 'power' },
-          //{ name: 'xAccel' },
-          //{ name: 'yAccel' },
-          //{ name: 'zAccel' },
+          { name: 'xAccel' },
+          { name: 'yAccel' },
+          { name: 'zAccel' },
           //{ name: 'stepDetected' }
         ],
         undefined,
@@ -23944,6 +23957,11 @@ pointStream.end(new Buffer(points));
 var rawStream = Baconifier.pipe(pointStream);
 
 $(function() {
+  var $stopper = $('button#stopper')
+                   .asEventStream('click')
+                   .onValue(function(e) {
+                     debugger;
+                   })
   var graph = CadenceGraph.render(document);
   var annotator = CadenceGraph.annotator(graph, document.getElementById('timeline'));
   annotator.add(new Date().getTime(), "starting");
@@ -23956,20 +23974,13 @@ $(function() {
     if($(this).data('started') || e.keyCode !== 32) { return true; }
     $(this).data('started', true);
 
-    //$(document).append($('<p>Starting...</p>'))
-
-    rawStream.onValue(function(val) {
-      //console.log("raw: " + val);
-      //$body.append($('<p>Raw: ' + val + '</p>'));
-    });
-
     var powerStream = PowerConverter.pipe(rawStream);
     var stepStream = StepDetector.pipe(powerStream);
     var cadenceStream = CadenceCounter.pipe(stepStream);
 
     var hasSteppedStream = stepStream.onValue(function(val) {
-      debugger;
       var timeVal = new Date().getTime() / 1000
+      console.log(timeVal);
       annotator.add(timeVal, "step!");
       annotator.update();
     });
@@ -23982,10 +23993,15 @@ $(function() {
           tempo: cadence,
         };
       }
-    )
+    ).combine(rawStream, function(combined, raw) {
+      return _.extend(combined, {
+        xAccel: parseInt(raw.x),
+        yAccel: parseInt(raw.y),
+        zAccel: parseInt(raw.z)
+      });
+    });
     combinedStream.onValue(function(val) {
       var data = val;
-      console.log(JSON.stringify(data))
       graph.series.addData(data);
       graph.render();
 
@@ -23994,5 +24010,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_4dde83e0.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_8f7d4b35.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"./cadenceGraph":31,"baconjs":5,"buffer":11,"oMfpAn":16,"stream":18,"underscore":30}]},{},[32])
