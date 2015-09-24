@@ -39,8 +39,8 @@ $(function() {
   var cadenceStream = CadenceCounter.pipe(stepStream);
 
   var hasSteppedStream = stepStream.onValue(function(val) {
-    var timeVal = new Date().getTime() / 1000
-    annotator.add(timeVal, "step!");
+    var timeVal = val.timestamp.getTime() / 1000
+    annotator.add(timeVal, "step @ " + timeVal);
     annotator.update();
   });
 

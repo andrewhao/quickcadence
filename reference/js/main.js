@@ -20,13 +20,11 @@ module.exports = Baconifier;
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../lib/baconifier.js","/../../lib")
 },{"baconjs":5,"buffer":11,"csv":6,"oMfpAn":16}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-CYCLE_SAMPLE_INSTANCES = 6
+CYCLE_SAMPLE_INSTANCES = 2
 var CadenceCounter = {
   pipe: function(stream) {
     var cadenceStream = stream
-      .map(function(sample) {
-        return new Date()
-      })
+      .map('.timestamp')
       .slidingWindow(CYCLE_SAMPLE_INSTANCES, CYCLE_SAMPLE_INSTANCES)
       .map(function(times) {
         var t1 = times[0]
@@ -59,7 +57,8 @@ var PowerConverter = {
         //return rawMagnitude;
         //
         var val = parseInt(d.y, 10);
-        return val < 0 ? 0 : val;
+        return val
+        //return val < 0 ? 0 : val;
       });
   }
 };
@@ -75,10 +74,6 @@ var StepDetector = {
   pipe: function(stream) {
     // Fire an event every time acceleration changes from positive to negative
     var diffDirectionStream = stream
-      .map(function(v) {
-        //console.log("original: " + v);
-        return v;
-      })
       .diff(0, function(a, b) {
         return b - a
       })
@@ -87,13 +82,18 @@ var StepDetector = {
       })
       .map(function(diff) {
         var changeSignal = diff > 0;
-        return {"diff": diff, "changeSignal": changeSignal};
+
+        return {
+          "timestamp": new Date(),
+          "diff": diff,
+          "changeSignal": changeSignal
+        };
       })
       .slidingWindow(2,2)
       .filter(function(arr) {
         return arr[0].changeSignal !== arr[1].changeSignal;
       })
-      .log()
+      .map('.1')
 
     return diffDirectionStream;
   }
@@ -23975,8 +23975,8 @@ $(function() {
   var cadenceStream = CadenceCounter.pipe(stepStream);
 
   var hasSteppedStream = stepStream.onValue(function(val) {
-    var timeVal = new Date().getTime() / 1000
-    annotator.add(timeVal, "step!");
+    var timeVal = val.timestamp.getTime() / 1000
+    annotator.add(timeVal, "step @ " + timeVal);
     annotator.update();
   });
 
@@ -24004,5 +24004,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_741dbe58.js","/")
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ec67e0e8.js","/")
 },{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"./cadenceGraph":31,"baconjs":5,"buffer":11,"oMfpAn":16,"stream":18,"underscore":30}]},{},[32])
