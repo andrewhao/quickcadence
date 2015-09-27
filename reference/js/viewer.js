@@ -7,6 +7,9 @@ var fs = require('fs');
 var stream = require('stream');
 var Bacon = require('baconjs');
 var CadenceGraph = require('./cadenceGraph');
+var fft = require('fft-js').fft;
+var fftUtil = require('fft-js').util;
+var windowing = require('fft-windowing');
 var _ = require('underscore');
 
 var points = fs.readFileSync(__dirname + '/samples-1.csv', 'utf-8');
@@ -37,6 +40,28 @@ $(function() {
   var powerStream = PowerConverter.pipe(rawStream);
   var stepStream = StepDetector.pipe(powerStream);
   var cadenceStream = CadenceCounter.pipe(stepStream);
+
+  var fftStream = powerStream
+    .bufferWithCount(128)
+    .log()
+    .map(function(points) {
+      return windowing.hann(points)
+    })
+    .log()
+    .map(function(windowedPoints) {
+      var phasors = fft(windowedPoints);
+      var sampling_frequency = 50
+      var frequencies = fftUtil.fftFreq(phasors, sampling_frequency);
+      var magnitudes = fftUtil.fftMag(phasors);
+      var both = frequencies.map(function(f, ix) {
+        return {frequency: f, magnitude: magnitudes[ix]};
+      }).filter(function(fm) { return fm.frequency > 0 && fm.frequency < 3.0 })
+      var sorted = _.sortBy(both, 'magnitude');
+      return sorted[sorted.length - 1]
+    })
+    .log()
+    .map(function(v) { return v.frequency * 60 })
+    .log()
 
   var hasSteppedStream = stepStream.onValue(function(val) {
     var timeVal = val.timestamp.getTime() / 1000
