@@ -1,18 +1,40 @@
-var CadenceCounter = require('../../lib/cadenceCounter');
 var StepDetector = require('../../lib/stepDetector');
 var PowerConverter = require('../../lib/powerConverter');
 var CadenceCounter = require('../../lib/cadenceCounter');
 var Baconifier = require('../../lib/baconifier');
+var Bacon = require('baconjs');
 var fs = require('fs');
 var stream = require('stream');
-var Bacon = require('baconjs');
 var CadenceGraph = require('./cadenceGraph');
 var fft = require('fft-js').fft;
 var fftUtil = require('fft-js').util;
 var windowing = require('fft-windowing');
 var _ = require('underscore');
+var d3 = require('d3');
 
 var points = fs.readFileSync(__dirname + '/samples-1.csv', 'utf-8');
+
+SvgCreator = {
+  render: function(frequencyData) {
+    var svgHeight = '300';
+    var svgWidth = '1200';
+    var barPadding = '1';
+    function createSvg(parent, height, width) {
+      return d3.select(parent).append('svg').attr('height', height).attr('width', width);
+    }
+    var svg = createSvg('body', svgHeight, svgWidth);
+
+    // Create our initial D3 chart.
+    svg.selectAll('rect')
+    .data(frequencyData)
+    .enter()
+    .append('rect')
+    .attr('x', function (d, i) {
+      return i * (svgWidth / frequencyData.length);
+    })
+    .attr('width', svgWidth / frequencyData.length - barPadding);
+  }
+}
 
 $(function() {
   var $stopper = $('button#stopper')
@@ -48,6 +70,10 @@ $(function() {
       return windowing.hann(points)
     })
     .log()
+    .map(function(points) {
+      SvgCreator.render(points);
+      return points;
+    })
     .map(function(windowedPoints) {
       var phasors = fft(windowedPoints);
       var sampling_frequency = 50

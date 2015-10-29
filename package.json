@@ -1,6 +1,6 @@
 {
   "name": "quickcadence",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Cadence detection for accelerometer data.",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "brfs": "^1.4.0",
     "browserify": "^10.2.4",
     "browserify-fs": "^1.0.0",
+    "d3": "^3.5.6",
     "fft-js": "0.0.9",
     "fft-windowing": "^0.1.4",
     "filesystem-browserify": "0.0.1",
