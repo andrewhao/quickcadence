@@ -3,6 +3,8 @@
 
 [![Accelerometer sample graphs](https://i.gyazo.com/fa11d9be4f8d3a14ea2ae7f5684d874f.gif)](https://gyazo.com/fa11d9be4f8d3a14ea2ae7f5684d874f)
 
+[![Circle CI](https://circleci.com/gh/andrewhao/quickcadence.svg?style=svg)](https://circleci.com/gh/andrewhao/quickcadence)
+
 Cadence detection for event-driven accelerometer data
 
 ## Usage
