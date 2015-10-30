@@ -1,15 +1,38 @@
 # quickcadence
 
+
 [![Accelerometer sample graphs](https://i.gyazo.com/fa11d9be4f8d3a14ea2ae7f5684d874f.gif)](https://gyazo.com/fa11d9be4f8d3a14ea2ae7f5684d874f)
 
 Cadence detection for event-driven accelerometer data
 
+## Usage
+
+```js
+var QuickCadence = require('quickcadence')
+
+// On a Node `streams2` stream, or BaconJS `Observable` stream.
+// Returns a BaconJS Observable.
+//
+// The stream must be object that matches the schema:
+// {x: <xAccelValue>, y: <yAccelValue>, z: <zAccelValue>}
+var cadenceStream = QuickCadence.pipe(stream);
+cadenceStream.onValue(function(val) { console.log(val) });
+
+// Values emitted are integers of the current cadence calculation.
+// `93.22`
+// `88.11`
+// `79.25` ...
+```
+
+## Limitations
+
+Power is matched off of the `y` acceleration axis, which works well for
+wrist-mounted accelerometers (watches). Further work can be done to
+generalize this algorithm to all-axes calculations.
+
 ## Data harness for your accelerometer data
 
-Currently building out the visualization framework to tweak data.
+Put CSV dump of files with other `csv` files.
 
-### Findings
-
-* Build graph framework
-* Discover that some axes are better suited for run motion than others
-* Rickshaw is hard
+    $ gulp watch
+    $ open reference/index.html

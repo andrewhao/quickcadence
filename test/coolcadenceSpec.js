@@ -1,3 +1,0 @@
-CoolCadence = require '../lib/coolcadence'
-
-
