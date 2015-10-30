@@ -36,3 +36,9 @@ Put CSV dump of files with other `csv` files.
 
     $ gulp watch
     $ open reference/index.html
+
+## Build
+
+    $ gulp build
+
+Assets are dumped into the `builds/` directory.

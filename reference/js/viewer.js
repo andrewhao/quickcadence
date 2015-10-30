@@ -44,9 +44,8 @@ $(function() {
   var valve = commandStream.toProperty().startWith(false)
   valve.assign($('body'), 'data', 'started')
 
-  
   var pointStream = TestDataStream.pointsAsStream(points);
-  var rawStream = Baconifier.pipe(pointStream)
+  var rawStream = pointStream
                   .skipUntil($starter)
                   .holdWhen(commandStream)
 

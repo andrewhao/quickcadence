@@ -12,6 +12,14 @@ gulp.task('watch', function() {
   });
 });
 
+gulp.task('build', function() {
+  gulp.src('lib/quickCadence.js')
+      .pipe(browserify({
+      }))
+      .pipe(rename('quickCadence.all.js'))
+      .pipe(gulp.dest('build'));
+});
+
 gulp.task('browserify', function() {
   gulp.src('reference/js/viewer.js')
       .pipe(browserify({
