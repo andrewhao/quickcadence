@@ -1,7 +1,6 @@
 var StepDetector = require('../../lib/stepDetector');
 var PowerConverter = require('../../lib/powerConverter');
 var CadenceCounter = require('../../lib/cadenceCounter');
-var Baconifier = require('../../lib/baconifier');
 var TestDataStream = require('../../lib/testDataStream');
 var Bacon = require('baconjs');
 var fs = require('fs');

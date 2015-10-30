@@ -33522,7 +33522,6 @@ module.exports = CadenceGraph;
 var StepDetector = require('../../lib/stepDetector');
 var PowerConverter = require('../../lib/powerConverter');
 var CadenceCounter = require('../../lib/cadenceCounter');
-var Baconifier = require('../../lib/baconifier');
 var TestDataStream = require('../../lib/testDataStream');
 var Bacon = require('baconjs');
 
@@ -33608,5 +33607,5 @@ $(function() {
   });
 });
 
-}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_dce0d74f.js","/")
-},{"../../lib/baconifier":1,"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"../../lib/testDataStream":5,"./cadenceGraph":33,"baconjs":6,"buffer":13,"d3":12,"oMfpAn":18,"underscore":32}]},{},[34])
+}).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_21c817bf.js","/")
+},{"../../lib/cadenceCounter":2,"../../lib/powerConverter":3,"../../lib/stepDetector":4,"../../lib/testDataStream":5,"./cadenceGraph":33,"baconjs":6,"buffer":13,"d3":12,"oMfpAn":18,"underscore":32}]},{},[34])
