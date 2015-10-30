@@ -1,6 +1,6 @@
 {
   "name": "quickcadence",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cadence detection for accelerometer data.",
   "main": "index.js",
   "scripts": {
