@@ -1,8 +1,8 @@
 {
   "name": "quickcadence",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cadence detection for accelerometer data.",
-  "main": "index.js",
+  "main": "lib/quickCadence.js",
   "scripts": {
     "build": "echo \"Starting build...\" && browserify -t brfs reference/js/viewer.js > reference/js/main.js",
     "test": "mocha"
@@ -23,13 +23,17 @@
   "bugs": {
     "url": "https://github.com/andrewhao/quickcadence/issues"
   },
+  "files": [
+    "lib/quickCadence.js",
+    "lib/quickCadence/**/*.js"
+  ],
   "homepage": "https://github.com/andrewhao/quickcadence",
   "dependencies": {
-    "baconjs": "^0.7.53",
-    "csv": "^0.4.5"
+    "baconjs": "^0.7.53"
   },
   "devDependencies": {
     "bower": "^1.4.1",
+    "csv": "^0.4.5",
     "brfs": "^1.4.0",
     "browserify": "^10.2.4",
     "browserify-fs": "^1.0.0",

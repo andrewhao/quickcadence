@@ -1,4 +1,18 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var StepDetector   = require('./quickCadence/stepDetector'),
+    PowerConverter = require('./quickCadence/powerConverter'),
+    CadenceCounter = require('./quickCadence/cadenceCounter');
+
+var QuickCadence = {
+  pipe: function(stream) {
+    var power = PowerConverter.pipe(stream);
+    var steps = StepDetector.pipe(power);
+    var cadence = CadenceCounter.pipe(steps);
+    return cadence;
+  }
+};
+
+module.exports = QuickCadence;
+
 CYCLE_SAMPLE_BUFFER_SIZE = 10
 var CadenceCounter = {
   pipe: function(stream) {
@@ -25,24 +39,6 @@ var CadenceCounter = {
 }
 module.exports = CadenceCounter;
 
-},{}],2:[function(require,module,exports){
-var StepDetector = require('./stepDetector'),
-    PowerConverter = require('./powerConverter'),
-    CadenceCounter = require('./cadenceCounter');
-
-QuickCadence = {
-  pipe: function(stream) {
-    return CadenceCounter.pipe(
-      StepDetector.pipe(
-        PowerConverter.pipe(stream)
-      )
-    );
-  }
-};
-
-module.exports = QuickCadence;
-
-},{"./cadenceCounter":1,"./powerConverter":3,"./stepDetector":4}],3:[function(require,module,exports){
 var PowerConverter = {
   pipe: function(stream) {
     return stream
@@ -55,7 +51,6 @@ var PowerConverter = {
 
 module.exports = PowerConverter;
 
-},{}],4:[function(require,module,exports){
 ACCEL_CHANGE_THRESHOLD = 50;
 DEBOUNCE_THRESHOLD = 200;
 
@@ -90,5 +85,3 @@ var StepDetector = {
 };
 
 module.exports = StepDetector;
-
-},{}]},{},[2])
