@@ -1,12 +1,12 @@
-var StepDetector = require('../../lib/stepDetector');
-var PowerConverter = require('../../lib/powerConverter');
-var CadenceCounter = require('../../lib/cadenceCounter');
-var TestDataStream = require('../../lib/testDataStream');
-var Bacon = require('baconjs');
-var fs = require('fs');
-var CadenceGraph = require('./cadenceGraph');
-var _ = require('underscore');
-var d3 = require('d3');
+var StepDetector   = require('../../lib/quickCadence/stepDetector');
+    PowerConverter = require('../../lib/quickCadence/powerConverter'),
+    CadenceCounter = require('../../lib/quickCadence/cadenceCounter'),
+    TestDataStream = require('../../lib/testDataStream'),
+    CadenceGraph   = require('./cadenceGraph'),
+    Bacon          = require('baconjs'),
+    fs             = require('fs'),
+    _              = require('underscore'),
+    d3             = require('d3');
 
 SvgCreator = {
   render: function(frequencyData) {
@@ -29,6 +29,7 @@ SvgCreator = {
     .attr('width', svgWidth / frequencyData.length - barPadding);
   }
 }
+
 var points = fs.readFileSync(__dirname + '/samples-1.csv', 'utf-8');
 
 $(function() {
