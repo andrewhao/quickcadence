@@ -35,13 +35,15 @@ generalize this algorithm to all-axes calculations.
 
 ## Data harness for your accelerometer data
 
-Put CSV dump of files with other `csv` files.
+Put CSV dump of files with other `csv` files in the `samples` directory.
 
-    $ gulp watch
-    $ open reference/index.html
+Start the dev server to load the data harness:
+
+    $ npm start
+    $ open http://localhost:8080/reference/index.html
 
 ## Build
 
-    $ gulp build
+    $ npm run build
 
-Assets are dumped into the `builds/` directory.
+Assets are generated into the `builds/` directory.
