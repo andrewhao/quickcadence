@@ -4,7 +4,7 @@ var webpack = require('webpack')
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   entry: {
-		"quickCadence": "./lib/quickCadence",
+    "quickCadence": "./lib/quickCadence",
     "referenceRunner": "./reference/js/runner",
 	},
   output: {
