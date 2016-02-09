@@ -1,14 +1,12 @@
-var StepDetector   = require('../../lib/quickCadence/stepDetector');
-    PowerConverter = require('../../lib/quickCadence/powerConverter'),
-    CadenceCounter = require('../../lib/quickCadence/cadenceCounter'),
-    TestDataStream = require('../../lib/testDataStream'),
-    CadenceGraph   = require('./cadenceGraph'),
-    Bacon          = require('baconjs'),
-    fs             = require('fs'),
-    _              = require('underscore'),
-    d3             = require('d3');
+var StepDetector = require('../../lib/stepDetector');
+var PowerConverter = require('../../lib/powerConverter');
+var CadenceCounter = require('../../lib/cadenceCounter');
+var TestDataStream = require('../../lib/testDataStream');
+var CadenceGraph = require('./cadenceGraph');
+var _ = require('underscore');
+var d3 = require('d3');
 
-SvgCreator = {
+const SvgCreator = {
   render: function(frequencyData) {
     var svgHeight = '300';
     var svgWidth = '1200';
@@ -30,9 +28,13 @@ SvgCreator = {
   }
 }
 
-var points = fs.readFileSync(__dirname + '/samples-1.csv', 'utf-8');
-
 $(function() {
+  $.ajax('/data/samples-1.csv')
+  .then(function(csv) {
+    return csv;
+  })
+  .then(function(points) {
+
   var $stopper = $('button#stopper')
                    .asEventStream('click')
                    .map(true)
@@ -84,5 +86,7 @@ $(function() {
     graph.render();
 
     dashboardWidget.text(val.tempo);
+  });
+
   });
 });

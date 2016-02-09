@@ -1,5 +1,4 @@
 var QuickCadence = require('../lib/quickCadence'),
-    Bacon = require('baconjs'),
     TestDataStream = require('../lib/testDataStream'),
     fs = require('fs'),
     assert = require('assert');
