@@ -1,38 +1,19 @@
-var StepDetector = require('../../lib/stepDetector');
-var PowerConverter = require('../../lib/powerConverter');
-var CadenceCounter = require('../../lib/cadenceCounter');
+var StepDetector = require('../../lib/quickCadence/stepDetector');
+var PowerConverter = require('../../lib/quickCadence/powerConverter');
+var CadenceCounter = require('../../lib/quickCadence/cadenceCounter');
 var TestDataStream = require('../../lib/testDataStream');
 var CadenceGraph = require('./cadenceGraph');
 var _ = require('underscore');
 var d3 = require('d3');
+var $ = require('jquery');
+window.jQuery = $;
+require('jquery-ui');
 
-const SvgCreator = {
-  render: function(frequencyData) {
-    var svgHeight = '300';
-    var svgWidth = '1200';
-    var barPadding = '1';
-    function createSvg(parent, height, width) {
-      return d3.select(parent).append('svg').attr('height', height).attr('width', width);
-    }
-    var svg = createSvg('body', svgHeight, svgWidth);
-
-    // Create our initial D3 chart.
-    svg.selectAll('rect')
-    .data(frequencyData)
-    .enter()
-    .append('rect')
-    .attr('x', function (d, i) {
-      return i * (svgWidth / frequencyData.length);
-    })
-    .attr('width', svgWidth / frequencyData.length - barPadding);
-  }
-}
+var Bacon = require('baconjs');
+jQuery.fn.asEventStream = Bacon.$.asEventStream;
 
 $(function() {
   $.ajax('/data/samples-1.csv')
-  .then(function(csv) {
-    return csv;
-  })
   .then(function(points) {
 
   var $stopper = $('button#stopper')
@@ -46,7 +27,7 @@ $(function() {
   var valve = commandStream.toProperty().startWith(false)
   valve.assign($('body'), 'data', 'started')
 
-  var pointStream = TestDataStream.pointsAsStream(points);
+  var pointStream = TestDataStream.pointsAsRealtimeStream(points);
   var rawStream = pointStream
                   .skipUntil($starter)
                   .holdWhen(commandStream)
@@ -60,7 +41,7 @@ $(function() {
   var cadenceStream = CadenceCounter.pipe(stepStream);
 
   var hasSteppedStream = stepStream.onValue(function(val) {
-    var timeVal = val.timestamp.getTime() / 1000
+    var timeVal = val.timestamp / 1000
     annotator.add(timeVal, "step @ " + timeVal);
     annotator.update();
   });
@@ -69,24 +50,25 @@ $(function() {
     cadenceStream,
     function(power, cadence) {
       return {
-        power: power,
-        tempo: cadence,
+        power: parseFloat(power.power),
+        tempo: parseFloat(cadence),
       };
     }
   ).combine(rawStream, function(combined, raw) {
     return _.extend(combined, {
-      xAccel: parseInt(raw.x),
-      yAccel: parseInt(raw.y),
-      zAccel: parseInt(raw.z)
+      xAccel: parseFloat(raw.x),
+      yAccel: parseFloat(raw.y),
+      zAccel: parseFloat(raw.z)
     });
   });
+
   combinedStream.onValue(function(val) {
     var data = val;
+    console.log(data);
     graph.series.addData(data);
     graph.render();
 
     dashboardWidget.text(val.tempo);
   });
-
   });
 });
