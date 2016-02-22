@@ -5,7 +5,7 @@
   "main": "lib/quickCadence.js",
   "scripts": {
     "build": "echo \"Starting build...\" && webpack",
-    "test": "mocha",
+    "test": "mocha --compilers js:babel-register test/**/*.js",
     "start": "webpack-dev-server"
   },
   "engines": {
@@ -36,15 +36,17 @@
     "rxjs": "^5.0.0-beta.1"
   },
   "devDependencies": {
-    "baconjs": "0.7.83",
-    "csv": "^0.4.5",
     "babel-core": "^6.4.0",
     "babel-loader": "^6.2.1",
     "babel-preset-es2015": "^6.3.13",
+    "babel-register": "6.5.2",
+    "baconjs": "0.7.83",
+    "csv": "^0.4.5",
     "d3": "^3.5.6",
     "mocha": "^2.2.5",
     "react-hot-loader": "^1.3.0",
     "rickshaw": "^1.5.1",
+    "rx-node": "1.0.2",
     "underscore": "^1.8.3",
     "webpack": "^1.12.11",
     "webpack-dev-server": "^1.14.1"
