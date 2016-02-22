@@ -1,38 +1,19 @@
-var StepDetector = require('../../lib/stepDetector');
-var PowerConverter = require('../../lib/powerConverter');
-var CadenceCounter = require('../../lib/cadenceCounter');
+var StepDetector = require('../../lib/quickCadence/stepDetector');
+var PowerConverter = require('../../lib/quickCadence/powerConverter');
+var CadenceCounter = require('../../lib/quickCadence/cadenceCounter');
 var TestDataStream = require('../../lib/testDataStream');
 var CadenceGraph = require('./cadenceGraph');
 var _ = require('underscore');
 var d3 = require('d3');
+var $ = require('jquery');
+window.jQuery = $;
+require('jquery-ui');
 
-const SvgCreator = {
-  render: function(frequencyData) {
-    var svgHeight = '300';
-    var svgWidth = '1200';
-    var barPadding = '1';
-    function createSvg(parent, height, width) {
-      return d3.select(parent).append('svg').attr('height', height).attr('width', width);
-    }
-    var svg = createSvg('body', svgHeight, svgWidth);
-
-    // Create our initial D3 chart.
-    svg.selectAll('rect')
-    .data(frequencyData)
-    .enter()
-    .append('rect')
-    .attr('x', function (d, i) {
-      return i * (svgWidth / frequencyData.length);
-    })
-    .attr('width', svgWidth / frequencyData.length - barPadding);
-  }
-}
+var Bacon = require('baconjs');
+jQuery.fn.asEventStream = Bacon.$.asEventStream;
 
 $(function() {
-  $.ajax('/data/samples-1.csv')
-  .then(function(csv) {
-    return csv;
-  })
+  $.ajax('/data/samples-3.csv')
   .then(function(points) {
 
   var $stopper = $('button#stopper')
@@ -80,13 +61,13 @@ $(function() {
       zAccel: parseInt(raw.z)
     });
   });
+
   combinedStream.onValue(function(val) {
     var data = val;
     graph.series.addData(data);
     graph.render();
 
-    dashboardWidget.text(val.tempo);
+    dashboardWidget.text(val.tempo.toFixed(2));
   });
-
   });
 });
