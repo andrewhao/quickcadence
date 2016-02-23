@@ -1,6 +1,6 @@
 import QuickCadence from '../lib/QuickCadence';
 import fs from 'fs';
-import TestDataStream from '../lib/testDataStream';
+import TestDataStream from '../lib/utils/TestDataStream';
 import assert from 'assert';
 
 const testDataStream = TestDataStream('bacon')

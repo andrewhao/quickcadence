@@ -1,5 +1,5 @@
 import { convertPower, detectSteps, calculateCadence } from '../../lib/QuickCadence';
-var TestDataStream = require('../../lib/testDataStream');
+var TestDataStream = require('../../lib/utils/TestDataStream');
 var CadenceGraph = require('./cadenceGraph');
 var _ = require('underscore');
 var d3 = require('d3');
