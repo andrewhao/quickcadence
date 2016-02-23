@@ -4,8 +4,8 @@ var webpack = require('webpack')
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   entry: {
-    "quickCadence": "./lib/quickCadence",
-    "referenceRunner": "./reference/js/runner",
+    "QuickCadence": ["./lib/QuickCadence"],
+    "BaconReferenceRunner": ["./reference/js/BaconRunner"],
 	},
   output: {
     path: path.join(__dirname, 'build'),

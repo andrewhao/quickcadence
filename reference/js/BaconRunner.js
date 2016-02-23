@@ -1,7 +1,5 @@
-var StepDetector = require('../../lib/quickCadence/stepDetector');
-var PowerConverter = require('../../lib/quickCadence/powerConverter');
-var CadenceCounter = require('../../lib/quickCadence/cadenceCounter');
-var TestDataStream = require('../../lib/testDataStream');
+import { convertPower, detectSteps, calculateCadence } from '../../lib/QuickCadence';
+var TestDataStream = require('../../lib/utils/TestDataStream');
 var CadenceGraph = require('./cadenceGraph');
 var _ = require('underscore');
 var d3 = require('d3');
@@ -27,7 +25,7 @@ $(function() {
   var valve = commandStream.toProperty().startWith(false)
   valve.assign($('body'), 'data', 'started')
 
-  var pointStream = TestDataStream.pointsAsRealtimeStream(points);
+  var pointStream = TestDataStream('bacon').pointsAsRealtimeStream(points);
   var rawStream = pointStream
                   .skipUntil($starter)
                   .holdWhen(commandStream)
@@ -36,9 +34,9 @@ $(function() {
   var annotator = CadenceGraph.annotator(graph, document.getElementById('timeline'));
   var dashboardWidget = $('.dashboard-widget .number');
 
-  var powerStream = PowerConverter.pipe(rawStream);
-  var stepStream = StepDetector.pipe(powerStream);
-  var cadenceStream = CadenceCounter.pipe(stepStream);
+  var powerStream = convertPower(rawStream);
+  var stepStream = detectSteps(powerStream);
+  var cadenceStream = calculateCadence(stepStream);
 
   var hasSteppedStream = stepStream.onValue(function(val) {
     var timeVal = val.timestamp / 1000
