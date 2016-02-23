@@ -3,8 +3,9 @@ import fs from 'fs';
 import TestDataStream from '../lib/testDataStream';
 import assert from 'assert';
 
-describe('QuickCadence', function() {
+const testDataStream = TestDataStream('bacon')
 
+describe('QuickCadence', function() {
   [
     ['samples-1.csv', 70.75],
     ['samples-2.csv', 96.77],
@@ -16,7 +17,7 @@ describe('QuickCadence', function() {
 
     describe(`.pipe() from ${fileName}`, function() {
       const points = fs.readFileSync(`${__dirname}/../data/${fileName}`, 'utf-8');
-      const stream = TestDataStream.pointsAsStream(points);
+      const stream = testDataStream.pointsAsStream(points);
       it('takes a sample set of data and returns a set of cadence details', function(done) {
         this.timeout(10000);
 
