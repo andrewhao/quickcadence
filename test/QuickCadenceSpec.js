@@ -1,4 +1,4 @@
-import QuickCadence from '../lib/quickCadence';
+import QuickCadence from '../lib/QuickCadence';
 import fs from 'fs';
 import TestDataStream from '../lib/testDataStream';
 import assert from 'assert';

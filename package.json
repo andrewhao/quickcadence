@@ -2,7 +2,7 @@
   "name": "quickcadence",
   "version": "0.2.0",
   "description": "Cadence detection for accelerometer data.",
-  "main": "lib/quickCadence.js",
+  "main": "lib/QuickCadence.js",
   "scripts": {
     "build": "echo \"Starting build...\" && webpack",
     "test": "mocha --compilers js:babel-register test/**/*.js",
@@ -28,8 +28,7 @@
     "url": "https://github.com/andrewhao/quickcadence/issues"
   },
   "files": [
-    "lib/quickCadence.js",
-    "lib/quickCadence/**/*.js"
+    "lib/QuickCadence.js"
   ],
   "homepage": "https://github.com/andrewhao/quickcadence",
   "dependencies": {
