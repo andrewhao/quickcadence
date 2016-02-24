@@ -1,6 +1,6 @@
 {
   "name": "quickcadence",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cadence detection for accelerometer data. Available in RxJS and Bacon.js flavors.",
   "main": "build/RxCadence.js",
   "scripts": {
