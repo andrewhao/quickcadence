@@ -31,7 +31,10 @@
     "url": "https://github.com/andrewhao/quickcadence/issues"
   },
   "files": [
-    "lib/QuickCadence.js"
+    "build/RxCadence.js",
+    "build/QuickCadence.js",
+    "lib/QuickCadence.js",
+    "lib/RxCadence.js"
   ],
   "homepage": "https://github.com/andrewhao/quickcadence",
   "dependencies": {
