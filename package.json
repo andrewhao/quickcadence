@@ -1,8 +1,8 @@
 {
   "name": "quickcadence",
-  "version": "0.2.0",
-  "description": "Cadence detection for accelerometer data.",
-  "main": "build/QuickCadence.js",
+  "version": "1.0.1",
+  "description": "Cadence detection for accelerometer data. Available in RxJS and Bacon.js flavors.",
+  "main": "build/RxCadence.js",
   "scripts": {
     "build": "echo \"Starting build...\" && webpack",
     "test": "mocha --compilers js:babel-register test/**/*.js",
@@ -19,6 +19,8 @@
   "keywords": [
     "accelerometer",
     "cadence",
+    "RxJS",
+    "Bacon.js",
     "events",
     "algorithm",
     "frp"
