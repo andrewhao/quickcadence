@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     "QuickCadence": ["./lib/QuickCadence"],
     "BaconReferenceRunner": ["./reference/js/BaconRunner"],
+    "RxJSReferenceRunner": ["./reference/js/RxJSRunner"],
 	},
   output: {
     path: path.join(__dirname, 'build'),
@@ -14,7 +15,7 @@ module.exports = {
   },
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoErrorsPlugin()
   ],
   module: {
     loaders: [{
