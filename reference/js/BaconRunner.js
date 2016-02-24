@@ -62,7 +62,6 @@ $(function() {
 
   combinedStream.onValue(function(val) {
     var data = val;
-    console.log(data);
     graph.series.addData(data);
     graph.render();
 

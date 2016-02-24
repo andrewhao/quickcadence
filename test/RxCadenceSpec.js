@@ -22,7 +22,7 @@ describe('RxCadence', function() {
         RxCadence.pipe(stream)
         .catch((err) => console.log(err))
         .subscribe((v) => {
-          assert.equal(v, expectedValue);
+          assert.equal(v.toFixed(2), expectedValue);
           done();
         });
       })
