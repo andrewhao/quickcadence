@@ -1,6 +1,6 @@
-import RxCadence from '../lib/RxCadence';
+import RxCadence from '../src/RxCadence';
 import fs from 'fs';
-import TestDataStream from '../lib/utils/TestDataStream';
+import TestDataStream from '../src/utils/TestDataStream';
 import assert from 'assert';
 
 const testData = TestDataStream('rxjs');
