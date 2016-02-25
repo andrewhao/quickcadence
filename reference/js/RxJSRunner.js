@@ -15,9 +15,44 @@ const CADENCE = 'CADENCE';
 const STARTED = 'STARTED';
 const PAUSED = 'PAUSED';
 const INIT = 'INIT';
+const CHOOSE_HTML5_INPUT = 'CHOOSE_HTML5_INPUT';
+const CHOOSE_STUB_INPUT = 'CHOOSE_STUB_INPUT';
+const HTML5_INPUT = 'HTML5_INPUT';
+const STUB_INPUT = 'STUB_INPUT';
+const DEFAULT_INPUT = STUB_INPUT;
 
-function main({ DOM, Motion }) {
-  const raw$ = Motion.events.share()
+function main({ DOM, Motion, StubMotion }) {
+  const html5Raw$ = Motion.events.share()
+  const stubRaw$ = StubMotion.events.share()
+
+  const selectorMux$ = Observable.merge(
+    DOM.select('#chooseHtml5').events('click').map(v => ({ name: CHOOSE_HTML5_INPUT })),
+    DOM.select('#chooseStub').events('click').map(v => ({ name: CHOOSE_STUB_INPUT }))
+  )
+
+  const inputSelectionState$ = selectorMux$
+  .map(action => {
+      if (action.name === CHOOSE_HTML5_INPUT) {
+        return HTML5_INPUT;
+      }
+      else {
+        return STUB_INPUT;
+      }
+  })
+  .startWith(DEFAULT_INPUT)
+
+  const raw$ = Observable
+  .combineLatest(html5Raw$,
+                 stubRaw$,
+                 inputSelectionState$)
+  .map(([html5, stub, choose]) => {
+    if (choose === HTML5_INPUT) {
+      return html5;
+    } else {
+      return stub;
+    }
+  })
+
   const power$ = RxCadence.convertPower(raw$).share()
   const step$ = RxCadence.detectSteps(power$).share()
   const cadence$ = RxCadence.calculateCadence(step$).share()
@@ -26,13 +61,16 @@ function main({ DOM, Motion }) {
     DOM.select('#starter').events('click').map(v => ({ name: START })),
     DOM.select('#stopper').events('click').map(v => ({ name: STOP })),
     cadence$.map(cadenceValue => ({ name: CADENCE, value: cadenceValue.toFixed(2) })),
-    raw$.throttle(100).map(motion => ({ name: MOVE, value: motion }))
+    raw$.throttle(100).map(motion => ({ name: MOVE, value: motion })),
+    DOM.select('#chooseHtml5').events('click').map(v => ({ name: CHOOSE_HTML5_INPUT })),
+    DOM.select('#chooseStub').events('click').map(v => ({ name: CHOOSE_STUB_INPUT }))
   )
 
   const initialState = {
-    cadence: undefined,
-    runState: PAUSED,
+    cadence: '--',
+    runState: STARTED,
     rawMotion: undefined,
+    inputChoice: DEFAULT_INPUT,
   }
 
   const state$ = actions$
@@ -46,6 +84,10 @@ function main({ DOM, Motion }) {
         return Object.assign({}, history, { rawMotion: action.value });
       case CADENCE:
         return Object.assign({}, history, { cadence: action.value });
+      case CHOOSE_HTML5_INPUT:
+        return Object.assign({}, history, { inputChoice: HTML5_INPUT });
+      case CHOOSE_STUB_INPUT:
+        return Object.assign({}, history, { inputChoice: STUB_INPUT });
       default:
         return history;
     }
@@ -54,6 +96,8 @@ function main({ DOM, Motion }) {
   .map(v => Object.assign(v, {
     stopDisabled: v.runState === PAUSED,
     startDisabled: v.runState === STARTED,
+    stubInputChosen: v.inputChoice === STUB_INPUT,
+    html5InputChosen: v.inputChoice === HTML5_INPUT,
   }))
 
   const vtree$ = state$
@@ -61,10 +105,15 @@ function main({ DOM, Motion }) {
     return <div>
       <button id="starter" disabled={state.startDisabled}>Start</button>
       <button id="stopper" disabled={state.stopDisabled}>Pause</button>
+      <label><input type="radio" name="inputSelect" checked={state.stubInputChosen} id="chooseStub" /> Recorded Accelerometer</label>
+      <label><input type="radio" name="inputSelect" checked={state.html5InputChosen} id="chooseHtml5" /> HTML5 Accelerometer</label>
       <div class="dashboard-widget">
-        <h1>Cadence: <span class="number">{state.cadence}</span> BPM</h1>
+        <h1>Cadence: <span class="number">{state.cadence}</span> SPM</h1>
       </div>
-      <div><small>{ state.runState }</small></div>
+      <div>
+        <small>{ state.runState }</small>
+        <small>Input device: { state.inputChoice }</small>
+       </div>
       <div><small><code>{ JSON.stringify(state.rawMotion) }</code></small></div>
     </div>
   })
@@ -89,6 +138,7 @@ function main({ DOM, Motion }) {
   const sinks = {
     DOM: vtree$,
     Motion: shouldPause$,
+    StubMotion: shouldPause$,
     Rickshaw: rickshawInputs$,
   }
   return sinks
@@ -98,6 +148,7 @@ window.jQuery(() => {
   const drivers = {
     DOM: makeDOMDriver('#app'),
     Motion: makeMotionDriver(window),
+    StubMotion: makeStubMotionDriver(),
     Rickshaw: makeRickshawDriver(document)
   };
   Cycle.run(main, drivers)
@@ -108,9 +159,9 @@ function makeMotionDriver(win) {
     const source$ = Observable.fromEvent(win, 'devicemotion')
     .map(dm => {
       return {
-        x: dm.acceleration.x,
-        y: dm.acceleration.y,
-        z: dm.acceleration.z,
+        x: dm.accelerationIncludingGravity.x,
+        y: dm.accelerationIncludingGravity.y,
+        z: dm.accelerationIncludingGravity.z,
         time: new Date().getTime(),
       }
     })
@@ -131,7 +182,7 @@ function makeMotionDriver(win) {
 function makeStubMotionDriver() {
   return function fakeMotionDriver(shouldPause$) {
     const events$ = Observable
-    .fromPromise(jQuery.ajax('/data/samples-1.csv'))
+    .fromPromise(jQuery.ajax('../data/samples-1.csv'))
     .concatMap(points => {
       const data$ = TestDataStream('rxjs')
       .pointsAsRealtimeStream(points)

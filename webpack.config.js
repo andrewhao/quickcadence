@@ -4,13 +4,11 @@ var webpack = require('webpack')
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   entry: {
-    "QuickCadence": ["./src/QuickCadence"],
-    "RxCadence": ["./src/RxCadence"],
     "BaconReferenceRunner": ["./reference/js/BaconRunner"],
     "RxJSReferenceRunner": ["./reference/js/RxJSRunner"],
 	},
   output: {
-    path: path.join(__dirname, 'build'),
+    path: path.join(__dirname, 'reference', 'build'),
     filename: '[name].js',
 		publicPath: "/assets/"
   },
