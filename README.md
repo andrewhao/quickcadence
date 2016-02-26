@@ -10,6 +10,8 @@ Cadence detection for event-driven accelerometer data
 
 ## Usage
 
+### `QuickCadence` is for Bacon.js
+
 ```js
 var QuickCadence = require('quickcadence')
 
@@ -17,9 +19,26 @@ var QuickCadence = require('quickcadence')
 // Returns a BaconJS Observable.
 //
 // The stream must be object that matches the schema:
-// {x: <xAccelValue>, y: <yAccelValue>, z: <zAccelValue>}
+// {x: <xAccelValue>, y: <yAccelValue>, z: <zAccelValue>, time: <Date>}
 var cadenceStream = QuickCadence.pipe(stream);
 cadenceStream.onValue(function(val) { console.log(val) });
+
+// Values emitted are integers of the current cadence calculation.
+// `93.22`
+// `88.11`
+// `79.25` ...
+```
+
+### `RxCadence` is for RxJS
+
+```js
+var RxCadence = require('quickcadence')
+
+// The stream must be an RxJS Observable that emits values that match
+// the following schema:
+// {x: <xAccelValue>, y: <yAccelValue>, z: <zAccelValue>, time: <Date>}
+var cadenceStream = RxCadence.pipe(stream);
+cadenceStream.subscribe(function(val) { console.log(val) });
 
 // Values emitted are integers of the current cadence calculation.
 // `93.22`

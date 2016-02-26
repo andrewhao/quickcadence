@@ -68,7 +68,7 @@ function main({ DOM, Motion, StubMotion }) {
 
   const initialState = {
     cadence: '--',
-    runState: STARTED,
+    runState: PAUSED,
     rawMotion: undefined,
     inputChoice: DEFAULT_INPUT,
   }
@@ -103,18 +103,22 @@ function main({ DOM, Motion, StubMotion }) {
   const vtree$ = state$
   .map(state  => {
     return <div>
-      <button id="starter" disabled={state.startDisabled}>Start</button>
-      <button id="stopper" disabled={state.stopDisabled}>Pause</button>
-      <label><input type="radio" name="inputSelect" checked={state.stubInputChosen} id="chooseStub" /> Recorded Accelerometer</label>
-      <label><input type="radio" name="inputSelect" checked={state.html5InputChosen} id="chooseHtml5" /> HTML5 Accelerometer</label>
-      <div class="dashboard-widget">
-        <h1>Cadence: <span class="number">{state.cadence}</span> SPM</h1>
+      <div id="button-group">
+        <button id="starter" disabled={state.startDisabled}>Start</button>
+        <button id="stopper" disabled={state.stopDisabled}>Pause</button>
       </div>
-      <div>
-        <small>{ state.runState }</small>
-        <small>Input device: { state.inputChoice }</small>
-       </div>
-      <div><small><code>{ JSON.stringify(state.rawMotion) }</code></small></div>
+      <div id="input-selector-group">
+        <label><input type="radio" name="inputSelect" checked={state.stubInputChosen} id="chooseStub" /> Recorded Accelerometer</label>
+        <label><input type="radio" name="inputSelect" checked={state.html5InputChosen} id="chooseHtml5" /> HTML5 Accelerometer</label>
+      </div>
+      <div id="dashboard">
+        <div class="dashboard-widget">
+          <h1>Cadence: <span class="number">{state.cadence}</span> SPM</h1>
+        </div>
+        <div><small>App state: { state.runState }</small></div>
+        <div><small>Input device: { state.inputChoice }</small></div>
+        <div id="raw-input"><small><code>{ JSON.stringify(state.rawMotion) }</code></small></div>
+      </div>
     </div>
   })
 
