@@ -27,3 +27,7 @@ label {
 #dashboard {
   clear: both;
 }
+
+code {
+  word-wrap: break-word;
+}
